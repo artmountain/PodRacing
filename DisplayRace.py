@@ -1,7 +1,14 @@
-import matplotlib.pyplot as plt
-import matplotlib.path as mpath
-import matplotlib.patches as mpatches
+import json
+from random import randint
+
 import matplotlib.animation as animation
+import matplotlib.patches as mpatches
+import matplotlib.path as mpath
+import matplotlib.pyplot as plt
+
+from Courses import create_courses
+from NeuralNet import NeuralNetwork
+from TrainPodRacer import evaluate_racer
 
 X_MAX = 16000
 Y_MAX = 9000
@@ -10,8 +17,17 @@ CHECKPOINT_SIZE = 300
 TIME_PER_FRAME = 0.05
 # TIME_PER_FRAME = 1 # todo
 
+def generate_and_display_race(racer_config):
+    racer_nn_data = json.loads(racer_config)
+    racer_nn = NeuralNetwork(6, 2, [racer_nn_data['weights_0'], racer_nn_data['weights_1']],
+                               [racer_nn_data['biases_0'], racer_nn_data['biases_1']])
+    course = create_courses(1)[0]
+    score, next_checkpoint_idx, path, inputs = evaluate_racer(course, racer_nn, True)
+    print(f'Run racer with score {score}')
+    #path = [[randint(0, 5000), randint(0, 5000)] for _i in range(len(path))] todo
+    plot_pod_race(course.checkpoints, path, inputs)
 
-def plot_pod_race(checkpoints, path, inputs, nn_data):
+def plot_pod_race(checkpoints, path, inputs): #, nn_data): todo
     print(len(path), len(inputs))
     fig = plt.figure(figsize=(5, 4))
     ax = plt.axes(xlim=(0, X_MAX), ylim=(0, Y_MAX))
@@ -25,7 +41,7 @@ def plot_pod_race(checkpoints, path, inputs, nn_data):
     pod = plt.Circle((path[0][0], path[0][1]), POD_SIZE, color='b')
     ax.add_patch(pod)
 
-    output_template = 'round %i  steer %i'
+    output_template = 'round %i  steer %i  thrust %i'
     output_text = ax.text(0.05, 0.9, '', transform=ax.transAxes)
 
     def init():
@@ -38,9 +54,9 @@ def plot_pod_race(checkpoints, path, inputs, nn_data):
 
     def animate(i):
         pod.center = (path[i][0], path[i][1])
-        angle = int(inputs[min(i, len(inputs) - 1)][0])
-        output_text.set_text(output_template % (i, angle))
-        print([[round(x, 2) for x in nn_data[i][j]] for j in range(2)])
+        angle, thrust = map(int, inputs[min(i, len(inputs) - 1)])
+        output_text.set_text(output_template % (i, angle, thrust))
+        #print([[round(x, 2) for x in nn_data[i][j]] for j in range(2)])
         return checkpoint_icons[0], checkpoint_icons[1], checkpoint_icons[2], pod, output_text
 
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(path), interval=TIME_PER_FRAME * 1000, blit=True)
