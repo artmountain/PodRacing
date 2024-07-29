@@ -65,6 +65,12 @@ class NeuralNetwork:
             network_data.append(layer_outputs)
         return network_data[-1]
 
+    @staticmethod
+    def create_from_json(json_str):
+        nn_data = json.loads(json_str)
+        return NeuralNetwork(6, 2, [np.array(nn_data['weights_0']), np.array(nn_data['weights_1'])],
+                             [np.array(nn_data['biases_0']), np.array(nn_data['biases_1'])])
+
     # Fitting below this line
 
     def get_total_fit_score(self, inputs, outputs):
@@ -139,8 +145,8 @@ class NeuralNetwork:
                 biases.append(neuron.bias.tolist())
             nn_config['weights_' + str(layer)] = weights
             nn_config['biases_' + str(layer)] = biases
-        with open(filename, 'w') as outfile:
-            outfile.write(json.dumps(nn_config))
+        with open(filename, 'a') as outfile:
+            outfile.write(json.dumps(nn_config) + '\n')
 
 
 # shape is [hidden_layer_1_size, ..., hidden_layer_N_size]
