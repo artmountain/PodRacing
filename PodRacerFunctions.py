@@ -61,7 +61,7 @@ def transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, ch
         ]
 
 def transform_nn_outputs_to_instructions(nn_outputs):
-    return [(nn_outputs[0] - 0.5) * 360, transform_output_to_speed(nn_outputs[1])]
+    return [2 * (nn_outputs[0] - 0.5) * MAX_STEER_PER_TURN, transform_output_to_speed(nn_outputs[1])]
 
 def update_angle(current_angle, target_angle):
     clockwise = target_angle - current_angle + (FULL_CIRCLE if target_angle < current_angle else 0)
