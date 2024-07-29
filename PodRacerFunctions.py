@@ -1,8 +1,10 @@
+import numpy as np
 import math
 
 MAX_STEER_PER_TURN = math.radians(18)
 FULL_CIRCLE = math.radians(360)
 HALF_CIRCLE = math.radians(180)
+
 
 def get_angle(vector):
     xx, yy = vector[0], vector[1]
@@ -15,13 +17,22 @@ def get_angle_and_distance(vector):
     return np.array((angle_deg, distance))
 
 # Transform distance to a number between 0 and 1
-def transform_distance(distance):
+def transform_distance_to_input(distance):
     return 1 / (1 + distance / 1000)
+
+def transform_output_to_distance(output):
+    return (1 / output - 1) * 1000
+
+def transform_speed_to_input(speed):
+    return 1 / (1 + speed / 100)
+
+def transform_output_to_speed(output):
+    return (1 / output - 1) * 100
 
 def get_relative_angle_and_distance_for_nn_input(position, target, my_angle):
     relative_position = target - position
     distance = round(math.sqrt(np.sum(np.square(relative_position))))
-    distance = transform_distance(distance)
+    distance = transform_distance_to_input(distance)
     angle = math.atan2(relative_position[0], relative_position[1])
     angle = (angle - my_angle) / (2 * math.pi)
     if angle > 1:
@@ -32,10 +43,17 @@ def get_relative_angle_and_distance_for_nn_input(position, target, my_angle):
 
 # Everything relative to current angle pod is facing
 def transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance):
-    return [(nn_outputs[0] - 0.5) * 2 * MAX_STEER_PER_TURN, nn_outputs[1] * 100]
+    return [
+        velocity_angle + 180 / 360,
+        transform_speed_to_input(speed),
+        checkpoint_angle + 180 / 360,
+        transform_distance_to_input(checkpoint_distance),
+        next_checkpoint_angle + 180 / 360,
+        transform_distance_to_input(next_checkpoint_distance)
+        ]
 
 def transform_nn_outputs_to_instructions(nn_outputs):
-    return [(nn_outputs[0] - 0.5) * 2 * MAX_STEER_PER_TURN, nn_outputs[1] * 100]
+    return [(nn_outputs[0] - 0.5) * 360, transform_output_to_speed(nn_outputs[1])]
 
 def update_angle(current_angle, target_angle):
     clockwise = target_angle - current_angle + (FULL_CIRCLE if target_angle < current_angle else 0)

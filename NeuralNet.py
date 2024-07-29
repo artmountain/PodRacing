@@ -1,5 +1,6 @@
 import json
 import math
+from copy import deepcopy
 from random import randint, random
 
 import matplotlib.pyplot as plt
@@ -57,7 +58,7 @@ class NeuralNetwork:
             self.input_sizes.append(number_of_neurons)
 
     def evaluate(self, inputs):
-        network_data = deepcopy(inputs)
+        network_data = [deepcopy(inputs)]
         for layer in range(self.num_layers):
             layer_outputs = []
             for neuron_idx in range(len(self.neurons[layer])):
@@ -137,7 +138,6 @@ class NeuralNetwork:
                 biases.append(neuron.bias.tolist())
             nn_config['weights_' + str(layer)] = weights
             nn_config['biases_' + str(layer)] = biases
-        nn_config['input_scaling'] = self.input_scaling
         with open(filename, 'w') as outfile:
             outfile.write(json.dumps(nn_config))
 
@@ -146,13 +146,12 @@ class NeuralNetwork:
 def createNeuralNetwork(inputs, outputs, hidden_node_shape):
     num_inputs = len(inputs[0])
     num_outputs = len(outputs[0])
-    input_scaling = [max([inputs[i][n] for i in range(len(inputs))]) for n in range(num_inputs)]
     shape = [num_inputs] + hidden_node_shape + [num_outputs]
     weights = []
     biases = []
     for i in range(1, len(shape)):
         weights.append(np.random.random((shape[i], shape[i - 1])) / shape[i - 1])
         biases.append(np.zeros(shape[i]))
-    nn = NeuralNetwork(num_inputs, num_outputs, weights, biases, input_scaling)
+    nn = NeuralNetwork(num_inputs, num_outputs, weights, biases)
     nn.train(inputs, outputs)
     return nn
