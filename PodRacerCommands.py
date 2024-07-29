@@ -1,6 +1,13 @@
+from DisplayRace import generate_and_display_race
 from TrainPodRacer import train_pod_racer
 
-train_pod_racer('racer_config.txt')
+# Initial population
+train_pod_racer('racer_config.txt', None)
+
+# Evolve the population
+#train_pod_racer('racer_config.txt', 'racer_config.txt')
+
+# generate_and_display_race('racer_config.txt')
 
 #test_genetic_optimizer(False, True)
 #generate_training_set_for_neural_net()
