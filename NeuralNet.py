@@ -19,13 +19,13 @@ class Neuron:
         self.A = 0
 
     @staticmethod
-    def sigmoid(x):
+    def sigmoid(value):
         # print(x)
-        if x > 100:
+        if value > 100:
             return 1
-        if x < -100:
+        if value < -100:
             return 0
-        return 1 / (1 + math.exp(-x))
+        return 1 / (1 + math.exp(-value))
 
     def evaluate(self, inputs):
         self.inputs = inputs

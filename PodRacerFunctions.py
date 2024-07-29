@@ -16,8 +16,8 @@ def get_angle_and_distance(vector):
     distance = round(math.sqrt(np.sum(np.square(vector))))
     return np.array((angle_deg, distance))
 
-def get_relative_angle(angle, reference_angle):
-    return (angle - reference_angle + 180) % 360
+def get_relative_angle(_angle, reference_angle):
+    return (_angle - reference_angle + 180) % 360
 
 def get_relative_angle_and_distance(vector, reference_angle):
     angle_deg = get_relative_angle(round(math.degrees(get_angle(vector))), reference_angle)
@@ -31,23 +31,23 @@ def transform_distance_to_input(distance):
 def transform_output_to_distance(output):
     return (1 / output - 1) * 1000
 
-def transform_speed_to_input(speed):
-    return 1 / (1 + speed / 100)
+def transform_speed_to_input(_speed):
+    return 1 / (1 + _speed / 100)
 
 def transform_output_to_speed(output):
     return (1 / output - 1) * 100
 
-def get_relative_angle_and_distance_for_nn_input(position, target, my_angle):
-    relative_position = target - position
+def get_relative_angle_and_distance_for_nn_input(_position, _target, _my_angle):
+    relative_position = _target - _position
     distance = round(math.sqrt(np.sum(np.square(relative_position))))
     distance = transform_distance_to_input(distance)
-    angle = math.atan2(relative_position[0], relative_position[1])
-    angle = (angle - my_angle) / (2 * math.pi)
-    if angle > 1:
-        angle -= 1
-    elif angle < -1:
-        angle += 1
-    return [angle, distance]
+    _angle = math.atan2(relative_position[0], relative_position[1])
+    _angle = (_angle - _my_angle) / (2 * math.pi)
+    if _angle > 1:
+        _angle -= 1
+    elif _angle < -1:
+        _angle += 1
+    return [_angle, distance]
 
 # Everything relative to current angle pod is facing. Angles in degrees
 def transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance):
