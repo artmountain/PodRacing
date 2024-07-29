@@ -6,7 +6,6 @@ from random import randint, random
 import matplotlib.pyplot as plt
 import numpy as np
 
-NUMBER_OF_FITTING_RUNS = 20000
 LEARNING_RATE = 1
 
 
@@ -75,10 +74,10 @@ class NeuralNetwork:
         print("Fitting score : " + str(score))
         return score
 
-    def train(self, inputs, outputs):
+    def train(self, inputs, outputs, number_of_fitting_runs):
         training_data_size = len(inputs)
         self.get_total_fit_score(inputs, outputs)
-        for fit_idx in range(NUMBER_OF_FITTING_RUNS):
+        for fit_idx in range(number_of_fitting_runs):
             fit_data_idx = randint(0, training_data_size - 1)
             current_outputs = self.evaluate(inputs[fit_data_idx])
             # score += 0.5 * (np.dot(np.log(A), Y.T) + np.dot(log(1 - A), 1 - Y.T))
@@ -143,7 +142,7 @@ class NeuralNetwork:
 
 
 # shape is [hidden_layer_1_size, ..., hidden_layer_N_size]
-def createNeuralNetwork(inputs, outputs, hidden_node_shape):
+def createNeuralNetwork(inputs, outputs, hidden_node_shape, number_of_fitting_runs):
     num_inputs = len(inputs[0])
     num_outputs = len(outputs[0])
     shape = [num_inputs] + hidden_node_shape + [num_outputs]
@@ -153,5 +152,5 @@ def createNeuralNetwork(inputs, outputs, hidden_node_shape):
         weights.append(np.random.random((shape[i], shape[i - 1])) / shape[i - 1])
         biases.append(np.zeros(shape[i]))
     nn = NeuralNetwork(num_inputs, num_outputs, weights, biases)
-    nn.train(inputs, outputs)
+    nn.train(inputs, outputs, number_of_fitting_runs)
     return nn
