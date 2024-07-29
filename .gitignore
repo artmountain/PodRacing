@@ -132,10 +132,7 @@ static/icons/
 \.idea
 
 # Auto-generated file
-racer/PodRacer.py
-
-# Scratch file
-scratch.py
+racer/codingame_file/PodRacer.py
 
 # Calibrated neural net data
 nn_data
