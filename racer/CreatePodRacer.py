@@ -77,7 +77,10 @@ if __name__ == '__main__':
                 if '# INSERT NEURAL NETWORK CODE' in line:
                     with open('../NeuralNet.py', 'r') as nn:
                         for nn_line in nn:
-                            racer.write(nn_line)
+                            if 'Fitting below this line' in nn_line:
+                                break
+                            if not 'matplotlib.pyplot' in nn_line:
+                                racer.write(nn_line)
                 elif '# INSERT GAME FUNCTIONS' in line:
                     with open('../PodRacerFunctions.py', 'r') as functions:
                         for functions_line in functions:

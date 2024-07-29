@@ -65,6 +65,8 @@ class NeuralNetwork:
             network_data.append(layer_outputs)
         return network_data[-1]
 
+    # Fitting below this line
+
     def get_total_fit_score(self, inputs, outputs):
         score = 0
         for i in range(len(inputs)):
