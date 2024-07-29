@@ -43,16 +43,14 @@ while True:
         # [Checkpoint angle, Checkpoint distance, direction, speed, new_angle, thrust]
         # Angles are relative to current heading
         angle_degrees = round(math.degrees(angle))
-        direction_and_speed = get_angle_and_distance(velocity)
-        checkpoint_angle_and_distance = get_angle_and_distance(next_checkpoint_position - position)
+        velocity_angle, speed = get_relative_angle_and_distance(velocity, angle_degrees)
+        checkpoint_angle_and_distance = get_relative_angle_and_distance(next_checkpoint_position - position, angle_degrees)
         print(checkpoint_angle_and_distance[0], file=sys.stderr, flush=True)
-        checkpoint_angle_and_distance[0] = (checkpoint_angle_and_distance[0] - angle_degrees + 180) % 360
         print(checkpoint_angle_and_distance[0], file=sys.stderr, flush=True)
         next_checkpoint_angle_and_distance = [checkpoint_angle_and_distance[0], checkpoint_angle_and_distance[1] * 2]  # TODO get true value
-        velocity_angle = (direction_and_speed[0] - angle_degrees + 180) % 360
 
         # Get new direction and thrust from neural network
-        nn_inputs = checkpoint_angle_and_distance.tolist() + next_checkpoint_angle_and_distance + [velocity_angle, direction_and_speed[1]]
+        nn_inputs = checkpoint_angle_and_distance.tolist() + next_checkpoint_angle_and_distance + [velocity_angle, speed]
         # print(nn_inputs, file=sys.stderr, flush=True)
         [target_angle, thrust] = neural_network.evaluate(nn_inputs)
         target_angle = (angle_degrees + round(target_angle * 360) - 180) * math.pi / 180

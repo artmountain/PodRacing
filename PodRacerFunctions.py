@@ -16,6 +16,14 @@ def get_angle_and_distance(vector):
     distance = round(math.sqrt(np.sum(np.square(vector))))
     return np.array((angle_deg, distance))
 
+def get_relative_angle(angle, reference_angle):
+    return (angle - reference_angle + 180) % 360
+
+def get_relative_angle_and_distance(vector, reference_angle):
+    angle_deg = get_relative_angle(round(math.degrees(get_angle(vector))), reference_angle)
+    distance = round(math.sqrt(np.sum(np.square(vector))))
+    return np.array((angle_deg, distance))
+
 # Transform distance to a number between 0 and 1
 def transform_distance_to_input(distance):
     return 1 / (1 + distance / 1000)
@@ -41,7 +49,7 @@ def get_relative_angle_and_distance_for_nn_input(position, target, my_angle):
         angle += 1
     return [angle, distance]
 
-# Everything relative to current angle pod is facing
+# Everything relative to current angle pod is facing. Angles in degrees
 def transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance):
     return [
         velocity_angle + 180 / 360,
@@ -66,7 +74,6 @@ def update_angle(current_angle, target_angle):
         new_angle = current_angle + min(MAX_STEER_PER_TURN, clockwise)
         if new_angle > HALF_CIRCLE:
             new_angle -= FULL_CIRCLE
-    # print(target_angle * 180 / math.pi, current_angle * 180 / math.pi, new_angle * 180 / math.pi, file=sys.stderr, flush=True)
     return new_angle
 
 # Angles all in radians
