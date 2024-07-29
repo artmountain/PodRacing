@@ -1,12 +1,11 @@
 import json
 import math
 from random import randint, random
-from copy import deepcopy
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-NUMBER_OF_FITTING_RUNS = 50000
+NUMBER_OF_FITTING_RUNS = 20000
 LEARNING_RATE = 1
 
 
@@ -21,17 +20,16 @@ class Neuron:
 
     @staticmethod
     def sigmoid(x):
-        if x > 20:
+        # print(x)
+        if x > 100:
             return 1
-        if x < -20:
+        if x < -100:
             return 0
-        if x > 0:
-            return 1 - 0.5 / (x + 1)**2
-        return 0.5 / (x - 1) ** 2
+        return 1 / (1 + math.exp(-x))
 
     def evaluate(self, inputs):
         self.inputs = inputs
-        self.Z = self.weights.dot(inputs) + self.bias
+        self.Z = np.dot(self.weights, inputs) + self.bias
         self.A = self.sigmoid(self.Z)
         return self.A
 
@@ -53,19 +51,19 @@ class NeuralNetwork:
         self.num_outputs = num_outputs
         self.neurons = []
         self.input_sizes = [num_inputs]
-        self.network_data = [np.zeros(num_inputs)]
         for layer in range(self.num_layers):
             number_of_neurons = len(weights[layer])
             self.neurons.append([Neuron(weights[layer][i], biases[layer][i]) for i in range(number_of_neurons)])
             self.input_sizes.append(number_of_neurons)
-            self.network_data.append(np.zeros(number_of_neurons))
 
     def evaluate(self, inputs):
-        self.network_data[0] = inputs
+        network_data = deepcopy(inputs)
         for layer in range(self.num_layers):
+            layer_outputs = []
             for neuron_idx in range(len(self.neurons[layer])):
-                self.network_data[layer + 1][neuron_idx] = self.neurons[layer][neuron_idx].evaluate(self.network_data[layer])
-        return self.network_data[-1]
+                layer_outputs.append(self.neurons[layer][neuron_idx].evaluate(network_data[layer]))
+            network_data.append(layer_outputs)
+        return network_data[-1]
 
     def get_total_fit_score(self, inputs, outputs):
         score = 0
@@ -108,18 +106,17 @@ class NeuralNetwork:
                     plt.pause(0.5)
                     plt.close()
 
-    def mutate(self, mutation_rate, mutation_size):
+    def mutate(self, mutation_rate):
         weights = []
         biases = []
         for layer in range(len(self.neurons)):
             weights.append([])
             biases.append([])
             for neuron in self.neurons[layer]:
-                weights[-1].append(deepcopy(neuron.weights))
+                weights[-1].append(neuron.weights)
                 for i in range(len(weights[-1][-1])):
-                    if random() < mutation_rate:
-                        weights[-1][-1][i] += (random() - 0.5) * mutation_size
-                biases[-1].append(neuron.bias + ((random() - 0.5) * mutation_size if random() < mutation_rate else 0))
+                    weights[-1][-1][i] += (random() - 0.5) * mutation_rate
+                biases[-1].append(neuron.bias + (random() - 0.5) * mutation_rate)
         return NeuralNetwork(self.num_inputs, self.num_outputs, weights, biases)
 
     def print_neuron_config(self):
@@ -130,7 +127,7 @@ class NeuralNetwork:
             print('\nLayer ' + str(layer) + ' biases:')
             print([neuron.bias for neuron in self.neurons[layer]])
 
-    def get_neuron_config(self):
+    def pickle_neuron_config(self, filename):
         nn_config = {}
         for layer in range(len(self.neurons)):
             weights = []
@@ -140,10 +137,7 @@ class NeuralNetwork:
                 biases.append(neuron.bias.tolist())
             nn_config['weights_' + str(layer)] = weights
             nn_config['biases_' + str(layer)] = biases
-        return nn_config
-
-    def pickle_neuron_config(self, filename):
-        nn_config = self.get_neuron_config()
+        nn_config['input_scaling'] = self.input_scaling
         with open(filename, 'w') as outfile:
             outfile.write(json.dumps(nn_config))
 
@@ -152,12 +146,13 @@ class NeuralNetwork:
 def createNeuralNetwork(inputs, outputs, hidden_node_shape):
     num_inputs = len(inputs[0])
     num_outputs = len(outputs[0])
+    input_scaling = [max([inputs[i][n] for i in range(len(inputs))]) for n in range(num_inputs)]
     shape = [num_inputs] + hidden_node_shape + [num_outputs]
     weights = []
     biases = []
     for i in range(1, len(shape)):
         weights.append(np.random.random((shape[i], shape[i - 1])) / shape[i - 1])
         biases.append(np.zeros(shape[i]))
-    nn = NeuralNetwork(num_inputs, num_outputs, weights, biases)
+    nn = NeuralNetwork(num_inputs, num_outputs, weights, biases, input_scaling)
     nn.train(inputs, outputs)
     return nn

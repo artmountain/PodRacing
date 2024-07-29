@@ -133,3 +133,9 @@ static/icons/
 
 # Auto-generated file
 racer/PodRacer.py
+
+# Scratch file
+scratch.py
+
+# Calibrated neural net data
+nn_data
