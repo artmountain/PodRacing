@@ -1,6 +1,6 @@
 from TrainPodRacer import train_pod_racer
 
-train_pod_racer()
+train_pod_racer('racer_config.txt')
 
 #test_genetic_optimizer(False, True)
 #generate_training_set_for_neural_net()
