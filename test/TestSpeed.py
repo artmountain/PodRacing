@@ -1,6 +1,6 @@
-import numpy as np
-import math
 import timeit
+
+import numpy as np
 
 print(timeit.timeit('np.linalg.norm(x)', setup='import numpy as np; x = np.arange(100)', number=1000))
 print(timeit.timeit('np.sqrt(x.dot(x))', setup='import numpy as np; x = np.arange(100)', number=1000))

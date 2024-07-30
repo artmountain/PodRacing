@@ -9,16 +9,17 @@ from NeuralNet import NeuralNetwork
 from PodRacerFunctions import transform_race_data_to_nn_inputs, transform_nn_outputs_to_instructions, \
     evaluate_game_step, transform_distance_to_input, get_angle_and_distance, get_angle, get_relative_angle_and_distance
 
+# Test flag
+TEST = False
+# TEST = True
+
 # NN shape data
 RACER_NN_INPUTS = 6
 RACER_NN_OUTPUTS = 2
 RACER_NN_LAYERS = 2
 RACER_NN_LAYER_SIZES = [RACER_NN_INPUTS, RACER_NN_OUTPUTS]
 
-# Training data
-#TEST = True
-TEST = False
-
+# Training configuration
 POPULATION_SIZE = 5 if TEST else 50
 NUMBER_OF_DRIVE_STEPS = 20 if TEST else 200
 NUMBER_OF_TRAINING_COURSES = 5
@@ -33,9 +34,11 @@ def evaluate_racer(course, racer, record_path):
     position = deepcopy(course.get_start_position())
     next_checkpoint_idx = 0
     path = []
+    next_checkpoints = []
     inputs = []
     if record_path:
         path.append(deepcopy(position))
+        next_checkpoints.append(next_checkpoint_idx)
     velocity = [0, 0]
     angle = get_angle(checkpoints[0] - position)
     for step in range(NUMBER_OF_DRIVE_STEPS):
@@ -49,6 +52,7 @@ def evaluate_racer(course, racer, record_path):
         steer, thrust = transform_nn_outputs_to_instructions(nn_outputs)
         if record_path:
             path.append(deepcopy(position))
+            next_checkpoints.append(next_checkpoint_idx)
             inputs.append([math.degrees(steer), thrust])
         position, velocity, angle, hit_checkpoint = evaluate_game_step(position, velocity, angle, checkpoint_position, angle + steer, thrust)
         if hit_checkpoint:
@@ -56,7 +60,7 @@ def evaluate_racer(course, racer, record_path):
 
     distance_to_next_checkpoint = get_angle_and_distance(checkpoints[next_checkpoint_idx % len(checkpoints)] - position)[1]
     score = 100 * (next_checkpoint_idx + transform_distance_to_input(distance_to_next_checkpoint))
-    return score, next_checkpoint_idx, path, inputs
+    return score, next_checkpoint_idx, path, next_checkpoints, inputs
 
 def score_racer(racer, courses):
     return np.mean([evaluate_racer(course, racer, False)[0] for course in courses])
@@ -152,6 +156,12 @@ def train_pod_racer(output_file, racers_seed_file):
         racers = sorted(racers, key=lambda x: x[1], reverse=True)[:POPULATION_SIZE]
         print(f'Generation {generation}. Best score: {racers[0][1]}')
         print(f'All scores: {[r[1] for r in racers]}')
+
+        # TODO - remove
+        # Output results of best racer
+        for i in range(len(courses)):
+            score, next_checkpoint_idx, path, next_checkpoints, inputs = evaluate_racer(courses[i], racers[0][0], False)
+            print(f'Best racer course {i}. Score {score}, Checkpoint {next_checkpoint_idx}')
 
     # Output best racers
     best_racer = racers[0][0]

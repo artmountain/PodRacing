@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 LEARNING_RATE = 1
-
+NUMBER_OF_DP_FOR_PICKLE = 6
 
 class Neuron:
     def __init__(self, weights, bias):
@@ -141,8 +141,8 @@ class NeuralNetwork:
             weights = []
             biases = []
             for neuron in self.neurons[layer]:
-                weights.append(neuron.weights.tolist())
-                biases.append(neuron.bias.tolist())
+                weights.append(np.around(neuron.weights, NUMBER_OF_DP_FOR_PICKLE).tolist())
+                biases.append(np.around(neuron.bias, NUMBER_OF_DP_FOR_PICKLE).tolist())
             nn_config['weights_' + str(layer)] = weights
             nn_config['biases_' + str(layer)] = biases
         with open(filename, 'a') as outfile:
