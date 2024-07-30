@@ -10,14 +10,13 @@ def get_angle(vector):
     xx, yy = vector[0], vector[1]
     return math.atan2(xx, yy)
 
-
 def get_angle_and_distance(vector):
     angle_deg = round(math.degrees(get_angle(vector)))
     distance = round(math.sqrt(np.sum(np.square(vector))))
     return np.array((angle_deg, distance))
 
 def get_relative_angle(_angle, reference_angle):
-    return (_angle - reference_angle + 180) % 360
+    return (_angle - reference_angle + 180) % 360 - 180
 
 def get_relative_angle_and_distance(vector, reference_angle):
     angle_deg = get_relative_angle(round(math.degrees(get_angle(vector))), reference_angle)
