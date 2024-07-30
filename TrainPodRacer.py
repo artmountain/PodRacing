@@ -11,7 +11,7 @@ from PodRacerFunctions import transform_race_data_to_nn_inputs, transform_nn_out
 
 # Test flag
 TEST = False
-# TEST = True
+#TEST = True
 
 # NN shape data
 RACER_NN_INPUTS = 6
@@ -20,7 +20,7 @@ RACER_NN_LAYERS = 2
 RACER_NN_LAYER_SIZES = [RACER_NN_INPUTS, RACER_NN_OUTPUTS]
 
 # Training configuration
-POPULATION_SIZE = 5 if TEST else 50
+POPULATION_SIZE = 5 if TEST else 50 # todo
 NUMBER_OF_DRIVE_STEPS = 20 if TEST else 200
 NUMBER_OF_TRAINING_COURSES = 5
 NUMBER_OF_RACER_GENERATIONS = 10 if TEST else 100
@@ -114,6 +114,12 @@ def train_pod_racer(output_file, racers_seed_file):
         # Create new training courses each time to avoid over-fitting
         courses = create_courses(NUMBER_OF_TRAINING_COURSES)
 
+        # Update scores for existing racers
+        for racer_idx in range(POPULATION_SIZE):
+            score = score_racer(racers[racer_idx][0], courses)
+            new_score = 0.8 * racers[racer_idx][1] + 0.2 * score
+            racers[racer_idx][1] = new_score
+
         # Create and evaluate the next generation - first create new racers by mutation and replace parent if better
         for racer_idx in range(POPULATION_SIZE):
             new_racer = racers[racer_idx][0].mutate(NN_MUTATION_RATE)
@@ -155,7 +161,7 @@ def train_pod_racer(output_file, racers_seed_file):
         # Filter and select best of population
         racers = sorted(racers, key=lambda x: x[1], reverse=True)[:POPULATION_SIZE]
         print(f'Generation {generation}. Best score: {racers[0][1]}')
-        print(f'All scores: {[r[1] for r in racers]}')
+        print(f'All scores: {np.around(np.array([r[1] for r in racers]), 2).tolist()}')
 
         # TODO - remove
         # Output results of best racer
