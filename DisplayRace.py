@@ -22,11 +22,9 @@ def generate_and_display_race(racer_config):
                                [racer_nn_data['biases_0'], racer_nn_data['biases_1']])
     course = create_courses(1)[0]
     score, next_checkpoint_idx, path, inputs = evaluate_racer(course, racer_nn, True)
-    print(f'Run racer with score {score}')
-    #path = [[randint(0, 5000), randint(0, 5000)] for _i in range(len(path))] todo
     plot_pod_race(course.checkpoints, path, inputs)
 
-def plot_pod_race(checkpoints, path, inputs): #, nn_data): todo
+def plot_pod_race(checkpoints, path, inputs):
     print(len(path), len(inputs))
     fig = plt.figure(figsize=(5, 4))
     ax = plt.axes(xlim=(0, X_MAX), ylim=(0, Y_MAX))

@@ -19,11 +19,11 @@ RACER_NN_LAYER_SIZES = [RACER_NN_INPUTS, RACER_NN_OUTPUTS]
 #TEST = True
 TEST = False
 
-POPULATION_SIZE = 5 if TEST else 50 # TODO
-NUMBER_OF_DRIVE_STEPS = 20 if TEST else 200 # TODO
-NUMBER_OF_TRAINING_COURSES = 5 # TODO
-NUMBER_OF_RACER_GENERATIONS = 10 if TEST else 100 # TODO
-NUMBER_OF_RACER_MUTATIONS = 10 # TODO
+POPULATION_SIZE = 5 if TEST else 50
+NUMBER_OF_DRIVE_STEPS = 20 if TEST else 200
+NUMBER_OF_TRAINING_COURSES = 5
+NUMBER_OF_RACER_GENERATIONS = 10 if TEST else 100
+NUMBER_OF_RACER_MUTATIONS = 10
 NN_MUTATION_RATE = 0.05
 RANDOM_VARIATION = 0.2
 
@@ -42,7 +42,7 @@ def evaluate_racer(course, racer, record_path):
         velocity_angle, speed = get_relative_angle_and_distance(velocity, angle)
         checkpoint_position = checkpoints[next_checkpoint_idx % len(checkpoints)]
         checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - position, angle)
-        next_checkpoint_position = checkpoints[(next_checkpoint_idx + 1) % len(checkpoints)] # todo
+        next_checkpoint_position = checkpoints[(next_checkpoint_idx + 1) % len(checkpoints)]
         next_checkpoint_angle, next_checkpoint_distance = get_relative_angle_and_distance(next_checkpoint_position - position, angle)
         nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance)
         nn_outputs = racer.evaluate(nn_inputs)
@@ -63,7 +63,7 @@ def score_racer(racer, courses):
 
 def get_gene_from_racer(racer):
     gene = []
-    for layer in range(RACER_NN_LAYERS):
+    for layer in range(RACER_NN_LAYERS):  # TODO : make this work for generic NN shape
         for neuron in range(RACER_NN_LAYER_SIZES[layer]):
             gene += racer.neurons[layer][neuron].weights.tolist()
         for neuron in range(RACER_NN_LAYER_SIZES[layer]):
@@ -74,7 +74,7 @@ def build_racer_from_gene(gene):
     weights = []
     biases = []
     gene_index = 0
-    for layer in range(RACER_NN_LAYERS):
+    for layer in range(RACER_NN_LAYERS):  # TODO : make this work for generic NN shape
         weights_this_layer = []
         for neuron in range(RACER_NN_LAYER_SIZES[layer]):
             weights_this_layer.append(np.array(gene[gene_index:gene_index + RACER_NN_INPUTS]))
