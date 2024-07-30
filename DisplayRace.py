@@ -1,5 +1,4 @@
 import json
-from random import randint
 
 import matplotlib.animation as animation
 import matplotlib.patches as mpatches

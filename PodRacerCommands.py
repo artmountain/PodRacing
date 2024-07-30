@@ -2,12 +2,12 @@ from DisplayRace import generate_and_display_race
 from TrainPodRacer import train_pod_racer
 
 # Initial population
-train_pod_racer('racer_config.txt', None)
+train_pod_racer('nn_data/racer_config.txt', None)
 
 # Evolve the population
-#train_pod_racer('racer_config.txt', 'racer_config.txt')
+#train_pod_racer('nn_data/racer_config2.txt', 'nn_data/racer_config.txt')
 
-#generate_and_display_race(open('racer_config.txt').readlines()[0])
+#generate_and_display_race(open('nn_data/racer_config.txt').readlines()[0])
 
 #test_genetic_optimizer(False, True)
 #generate_training_set_for_neural_net()
