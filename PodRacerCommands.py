@@ -6,9 +6,10 @@ from TrainPodRacer import train_pod_racer
 
 # Evolve the population
 #train_pod_racer('nn_data/racer_config2.txt', 'nn_data/racer_config.txt')
-train_pod_racer('nn_data/racer_config3.txt', 'nn_data/racer_config2.txt')
+#train_pod_racer('nn_data/racer_config3.txt', 'nn_data/racer_config2.txt')
+#train_pod_racer('nn_data/racer_config4.txt', 'nn_data/racer_config3.txt')
 
-#generate_and_display_race(open('nn_data/racer_config.txt').readlines()[0])
+generate_and_display_race(open('nn_data/racer_config4.txt').readlines()[0])
 
 #test_genetic_optimizer(False, True)
 #generate_training_set_for_neural_net()

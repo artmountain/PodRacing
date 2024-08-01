@@ -36,6 +36,7 @@ def evaluate_racer(course, racer, record_path):
     path = []
     next_checkpoints = []
     inputs = []
+    angles = []  # todo remove when bug fixed
     if record_path:
         path.append(deepcopy(position))
         next_checkpoints.append(next_checkpoint_idx)
@@ -53,14 +54,15 @@ def evaluate_racer(course, racer, record_path):
         if record_path:
             path.append(deepcopy(position))
             next_checkpoints.append(next_checkpoint_idx)
-            inputs.append([math.degrees(steer), thrust])
+            inputs.append([round(math.degrees(steer)), thrust])
+            angles.append(math.degrees(angle))
         position, velocity, angle, hit_checkpoint = evaluate_game_step(position, velocity, angle, checkpoint_position, angle + steer, thrust)
         if hit_checkpoint:
             next_checkpoint_idx += 1
 
     distance_to_next_checkpoint = get_angle_and_distance(checkpoints[next_checkpoint_idx % len(checkpoints)] - position)[1]
     score = 100 * (next_checkpoint_idx + transform_distance_to_input(distance_to_next_checkpoint))
-    return score, next_checkpoint_idx, path, next_checkpoints, inputs
+    return score, next_checkpoint_idx, path, next_checkpoints, inputs, angles
 
 def score_racer(racer, courses):
     return np.mean([evaluate_racer(course, racer, False)[0] for course in courses])

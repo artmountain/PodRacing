@@ -14,17 +14,16 @@ Y_MAX = 9000
 POD_SIZE = 500
 CHECKPOINT_SIZE = 300
 TIME_PER_FRAME = 0.05
-# TIME_PER_FRAME = 1 # todo
 
 def generate_and_display_race(racer_config):
     racer_nn_data = json.loads(racer_config)
     racer_nn = NeuralNetwork(6, 2, [racer_nn_data['weights_0'], racer_nn_data['weights_1']],
                                [racer_nn_data['biases_0'], racer_nn_data['biases_1']])
     course = create_courses(1)[0]
-    score, next_checkpoint_idx, path, next_checkpoints, inputs = evaluate_racer(course, racer_nn, True)
-    plot_pod_race(course.checkpoints, path, next_checkpoints, inputs)
+    score, next_checkpoint_idx, path, next_checkpoints, inputs, angles = evaluate_racer(course, racer_nn, True)
+    plot_pod_race(course.checkpoints, path, next_checkpoints, inputs, angles)
 
-def plot_pod_race(checkpoints, path, next_checkpoints, inputs):
+def plot_pod_race(checkpoints, path, next_checkpoints, inputs, angles):
     print(len(path), len(inputs))
     fig = plt.figure(figsize=(5, 4))
     ax = plt.axes(xlim=(0, X_MAX), ylim=(0, Y_MAX))
@@ -38,7 +37,7 @@ def plot_pod_race(checkpoints, path, next_checkpoints, inputs):
     pod = plt.Circle((path[0][0], path[0][1]), POD_SIZE, color='b')
     ax.add_patch(pod)
 
-    output_template = 'round %i  steer %i  thrust %i  next checkpoint %i'
+    output_template = 'round %i  angle %i  steer %i  thrust %i  next checkpoint %i'
     output_text = ax.text(0.05, 0.9, '', transform=ax.transAxes)
 
     def init():
@@ -52,7 +51,7 @@ def plot_pod_race(checkpoints, path, next_checkpoints, inputs):
     def animate(i):
         pod.center = (path[i][0], path[i][1])
         angle, thrust = map(int, inputs[min(i, len(inputs) - 1)])
-        output_text.set_text(output_template % (i, angle, thrust, next_checkpoints[i]))
+        output_text.set_text(output_template % (i, angles[i], angle, thrust, next_checkpoints[i]))
         return checkpoint_icons[0], checkpoint_icons[1], checkpoint_icons[2], pod, output_text
 
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(path), interval=TIME_PER_FRAME * 1000, blit=True)

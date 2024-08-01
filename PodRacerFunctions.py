@@ -59,6 +59,7 @@ def transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, ch
         transform_distance_to_input(next_checkpoint_distance)
         ]
 
+# Output angle in radians
 def transform_nn_outputs_to_instructions(nn_outputs):
     return [2 * (nn_outputs[0] - 0.5) * MAX_STEER_PER_TURN, transform_output_to_speed(nn_outputs[1])]
 
