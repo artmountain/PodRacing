@@ -70,11 +70,11 @@ while True:
     #print(f'Sim angle after : {round(math.degrees(sim_angle))}', file=sys.stderr, flush=True)
     if hit_checkpoint:
         checkpoint_index += 1
-    print(f'Commands : {np.around(np.array((steer, thrust)), 2).tolist()}', file=sys.stderr, flush=True)
-    print(f'Next checkpoint : {checkpoint_index}', file=sys.stderr, flush=True)
+    #print(f'Commands : {np.around(np.array((steer, thrust)), 2).tolist()}', file=sys.stderr, flush=True)
+    #print(f'Next checkpoint : {checkpoint_index}', file=sys.stderr, flush=True)
 
     # Output the target position followed by the power (0 <= thrust <= 100)
-    print(f'Target angle : {round(math.degrees(target_angle))}', file=sys.stderr, flush=True)
+    #print(f'Target angle : {round(math.degrees(target_angle))}', file=sys.stderr, flush=True)
     target_position = position + 10000 * np.array((math.sin(target_angle), math.cos(target_angle)))
     outputs = map(round, np.append(target_position, thrust))
     print(*outputs, 'Get out of my way')
