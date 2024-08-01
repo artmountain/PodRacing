@@ -61,12 +61,15 @@ while True:
         # [Checkpoint angle, Checkpoint distance, direction, speed, new_angle, thrust]
         # Angles are relative to current heading and are all in radians except the input checkpoint angle
         velocity_angle, speed = get_relative_angle_and_distance(velocity, sim_angle)
-        verify_checkpoint_angle, verify_checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - position, sim_angle)
+        # verify_checkpoint_angle, verify_checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - position, sim_angle)
         # Check my view of angle to checkpoint vs the game - note game takes things to the R as +ve angles
         #print(f'My angle to cp : {-round(math.degrees(verify_checkpoint_angle))}, system angle to cp : {checkpoint_angle}', file=sys.stderr, flush=True)
         #print(f'My angle : {round(math.degrees(sim_angle))}, velocity angle : {round(math.degrees(velocity_angle))}', file=sys.stderr, flush=True)
-        next_checkpoint_angle, next_checkpoint_distance = get_relative_angle_and_distance(
-            checkpoint_position - position, sim_angle)  # todo
+        next_checkpoint_angle = checkpoint_angle
+        next_checkpoint_distance = 2 * checkpoint_distance
+        if seen_all_checkpoints:
+            next_checkpoint_position = checkpoints[(checkpoint_index + 1) % len(checkpoints)]
+            next_checkpoint_angle, next_checkpoint_distance = get_relative_angle_and_distance(next_checkpoint_position - position, sim_angle)
         nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance,
                                                      next_checkpoint_angle, next_checkpoint_distance)
         nn_outputs = racer.evaluate(nn_inputs)
