@@ -17,6 +17,9 @@ thrust = 0
 target_angle = 0
 initialized = False
 checkpoint_index = 0
+last_checkpoint_position = np.array((-1, -1))
+seen_all_checkpoints = False
+checkpoints = []
 while True:
     # next_checkpoint_x: x position of the next check point
     # next_checkpoint_y: y position of the next check point
@@ -29,7 +32,20 @@ while True:
     position = np.array((x, y))
     checkpoint_position = np.array((checkpoint_x, checkpoint_y))
     #print('My position : ' + str(x) + ' ' + str(y), file=sys.stderr, flush=True)
-    #print('Checkpoint : ' + str(checkpoint_x) + ' ' + str(checkpoint_y), file=sys.stderr, flush=True)
+    print('Checkpoint : ' + str(checkpoint_x) + ' ' + str(checkpoint_y), file=sys.stderr, flush=True)
+
+    # Update list of checkpoints
+    new_checkpoint = True
+    for checkpoint_index in range(len(checkpoints)):
+        checkpoint = checkpoints[checkpoint_index]
+        if checkpoint[0] == checkpoint_x and checkpoint[1] == checkpoint_y:
+            new_checkpoint = False
+            break
+    print(f'Checkpoint index : {checkpoint_index}', file=sys.stderr, flush=True)
+    print(f'Checkpoints : {checkpoints}', file=sys.stderr, flush=True)
+    if new_checkpoint:
+        checkpoints.append(checkpoint_position)
+        print(f'New checkpoint', file=sys.stderr, flush=True)
 
     if not initialized:
         sim_pos[0] = x
@@ -57,7 +73,7 @@ while True:
         steer, thrust = transform_nn_outputs_to_instructions(nn_outputs)
         print(f'Steer: {round(math.degrees(steer))} Thrust: {thrust}', file=sys.stderr, flush=True)
         # Grid in Codingame is inverted - need to subtract the steer angle
-        target_angle = sim_angle + steer
+        target_angle = sim_angle - steer
 
     # Record state
     print(x == sim_pos[0], y == sim_pos[1], file=sys.stderr, flush=True)
