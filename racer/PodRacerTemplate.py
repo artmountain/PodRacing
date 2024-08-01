@@ -1,4 +1,3 @@
-import math
 import sys
 
 # INSERT NEURAL NETWORK CODE
@@ -14,7 +13,6 @@ racer = NeuralNetwork.create_from_json(nn_data_str)
 sim_pos = np.array((0, 0))
 sim_angle = None
 velocity = np.zeros(2)
-angle = 0
 thrust = 0
 target_angle = 0
 initialized = False
@@ -37,29 +35,28 @@ while True:
         sim_pos[0] = x
         sim_pos[1] = y
         sim_angle = get_angle(checkpoint_position - position)
-        angle = math.degrees(sim_angle)
-        print(f'Start angle : {angle}', file=sys.stderr, flush=True)
+        print(f'Start angle : {round(math.degrees(sim_angle))}', file=sys.stderr, flush=True)
         steer = 0
         thrust = 100
-        target_angle = angle
+        target_angle = sim_angle
         initialized = True
     else:
         # Create neural network inputs
         # [Checkpoint angle, Checkpoint distance, direction, speed, new_angle, thrust]
-        # Angles are relative to current heading and are all in degrees
-        velocity_angle, speed = get_relative_angle_and_distance(velocity, angle)
-        verify_checkpoint_angle, verify_checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - position, angle)
+        # Angles are relative to current heading and are all in radians
+        velocity_angle, speed = get_relative_angle_and_distance(velocity, sim_angle)
+        verify_checkpoint_angle, verify_checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - position, sim_angle)
         # Check my view of angle to checkpoint vs the game - note game takes things to the R as +ve angles
         print(f'My angle to cp : {-verify_checkpoint_angle}, system angle to cp : {checkpoint_angle}', file=sys.stderr, flush=True)
-        print(f'My angle : {round(math.degrees(angle))}, velocity angle : {velocity_angle}', file=sys.stderr, flush=True)
+        print(f'My angle : {round(math.degrees(sim_angle))}, velocity angle : {velocity_angle}', file=sys.stderr, flush=True)
         next_checkpoint_angle, next_checkpoint_distance = get_relative_angle_and_distance(
-            checkpoint_position - position, angle)  # todo
+            checkpoint_position - position, sim_angle)  # todo
         nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance,
                                                      next_checkpoint_angle, next_checkpoint_distance)
         nn_outputs = racer.evaluate(nn_inputs)
         steer, thrust = transform_nn_outputs_to_instructions(nn_outputs)
         print(f'Steer: {steer} Thrust: {thrust}', file=sys.stderr, flush=True)
-        target_angle = angle + steer
+        target_angle = sim_angle + steer
 
     # Record state
     print(x == sim_pos[0], y == sim_pos[1], file=sys.stderr, flush=True)

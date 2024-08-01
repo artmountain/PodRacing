@@ -36,7 +36,7 @@ def transform_speed_to_input(_speed):
 def transform_output_to_speed(output):
     return (1 / output - 1) * 100
 
-# Everything relative to current angle pod is facing. Angles in degrees
+# Everything relative to current angle pod is facing. Angles in radians
 def transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance):
     return [
         velocity_angle * math.pi + 0.5,
