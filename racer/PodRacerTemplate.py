@@ -28,8 +28,8 @@ while True:
     # Arrays for my position and position of target checkpoint
     position = np.array((x, y))
     checkpoint_position = np.array((checkpoint_x, checkpoint_y))
-    print('My position : ' + str(x) + ' ' + str(y), file=sys.stderr, flush=True)
-    print('Checkpoint : ' + str(checkpoint_x) + ' ' + str(checkpoint_y), file=sys.stderr, flush=True)
+    #print('My position : ' + str(x) + ' ' + str(y), file=sys.stderr, flush=True)
+    #print('Checkpoint : ' + str(checkpoint_x) + ' ' + str(checkpoint_y), file=sys.stderr, flush=True)
 
     if not initialized:
         sim_pos[0] = x
@@ -47,8 +47,8 @@ while True:
         velocity_angle, speed = get_relative_angle_and_distance(velocity, sim_angle)
         verify_checkpoint_angle, verify_checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - position, sim_angle)
         # Check my view of angle to checkpoint vs the game - note game takes things to the R as +ve angles
-        print(f'My angle to cp : {-round(math.degrees(verify_checkpoint_angle))}, system angle to cp : {checkpoint_angle}', file=sys.stderr, flush=True)
-        print(f'My angle : {round(math.degrees(sim_angle))}, velocity angle : {round(math.degrees(velocity_angle))}', file=sys.stderr, flush=True)
+        #print(f'My angle to cp : {-round(math.degrees(verify_checkpoint_angle))}, system angle to cp : {checkpoint_angle}', file=sys.stderr, flush=True)
+        #print(f'My angle : {round(math.degrees(sim_angle))}, velocity angle : {round(math.degrees(velocity_angle))}', file=sys.stderr, flush=True)
         next_checkpoint_angle, next_checkpoint_distance = get_relative_angle_and_distance(
             checkpoint_position - position, sim_angle)  # todo
         nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance,
@@ -65,9 +65,9 @@ while True:
           file=sys.stderr, flush=True)
 
     # Simulate move - simulator works in radians
-    print(f'Sim angle : {round(math.degrees(sim_angle))}  target angle: {round(math.degrees(target_angle))}', file=sys.stderr, flush=True)
+    #print(f'Sim angle : {round(math.degrees(sim_angle))}  target angle: {round(math.degrees(target_angle))}', file=sys.stderr, flush=True)
     sim_pos, velocity, sim_angle, hit_checkpoint = evaluate_game_step(position, velocity, sim_angle, checkpoint_position, target_angle, thrust)
-    print(f'Sim angle after : {round(math.degrees(sim_angle))}', file=sys.stderr, flush=True)
+    #print(f'Sim angle after : {round(math.degrees(sim_angle))}', file=sys.stderr, flush=True)
     if hit_checkpoint:
         checkpoint_index += 1
     print(f'Commands : {np.around(np.array((steer, thrust)), 2).tolist()}', file=sys.stderr, flush=True)
