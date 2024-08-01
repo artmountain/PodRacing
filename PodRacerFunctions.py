@@ -33,8 +33,8 @@ def transform_output_to_distance(output):
 def transform_speed_to_input(_speed):
     return 1 / (1 + _speed / 100)
 
-def transform_output_to_speed(output):
-    return (1 / output - 1) * 100
+def transform_output_to_thrust(output):
+    return output * 100
 
 # Everything relative to current angle pod is facing. Angles in radians
 def transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance):
@@ -49,7 +49,7 @@ def transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, ch
 
 # Output angle in radians
 def transform_nn_outputs_to_instructions(nn_outputs):
-    return [2 * (nn_outputs[0] - 0.5) * MAX_STEER_PER_TURN, transform_output_to_speed(nn_outputs[1])]
+    return [2 * (nn_outputs[0] - 0.5) * MAX_STEER_PER_TURN, transform_output_to_thrust(nn_outputs[1])]
 
 def update_angle(current_angle, target_angle):
     clockwise = target_angle - current_angle + (FULL_CIRCLE if target_angle < current_angle else 0)
