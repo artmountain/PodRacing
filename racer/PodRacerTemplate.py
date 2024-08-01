@@ -56,6 +56,7 @@ while True:
         nn_outputs = racer.evaluate(nn_inputs)
         steer, thrust = transform_nn_outputs_to_instructions(nn_outputs)
         print(f'Steer: {round(math.degrees(steer))} Thrust: {thrust}', file=sys.stderr, flush=True)
+        # Grid in Codingame is inverted - need to subtract the steer angle
         target_angle = sim_angle + steer
 
     # Record state
