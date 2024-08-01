@@ -1,13 +1,14 @@
-from copy import deepcopy
 import math
 import random
+from copy import deepcopy
 
 import numpy as np
 
 from Courses import create_courses
 from NeuralNet import NeuralNetwork
 from PodRacerFunctions import transform_race_data_to_nn_inputs, transform_nn_outputs_to_instructions, \
-    evaluate_game_step, transform_distance_to_input, get_angle_and_distance, get_angle, get_relative_angle_and_distance
+    evaluate_game_step, transform_distance_to_input, get_angle, get_relative_angle_and_distance, \
+    get_distance
 
 # Test flag
 TEST = False
@@ -60,7 +61,7 @@ def evaluate_racer(course, racer, record_path):
         if hit_checkpoint:
             next_checkpoint_idx += 1
 
-    distance_to_next_checkpoint = get_angle_and_distance(checkpoints[next_checkpoint_idx % len(checkpoints)] - position)[1]
+    distance_to_next_checkpoint = get_distance(checkpoints[next_checkpoint_idx % len(checkpoints)] - position)
     score = 100 * (next_checkpoint_idx + transform_distance_to_input(distance_to_next_checkpoint))
     return score, next_checkpoint_idx, path, next_checkpoints, inputs, angles
 
@@ -168,7 +169,7 @@ def train_pod_racer(output_file, racers_seed_file):
         # TODO - remove
         # Output results of best racer
         for i in range(len(courses)):
-            score, next_checkpoint_idx, path, next_checkpoints, inputs = evaluate_racer(courses[i], racers[0][0], False)
+            score, next_checkpoint_idx, path, next_checkpoints, inputs, angles = evaluate_racer(courses[i], racers[0][0], False)
             print(f'Best racer course {i}. Score {score}, Checkpoint {next_checkpoint_idx}')
 
     # Output best racers
