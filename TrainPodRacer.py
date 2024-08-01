@@ -41,6 +41,8 @@ def evaluate_racer(course, racer, record_path):
     if record_path:
         path.append(deepcopy(position))
         next_checkpoints.append(next_checkpoint_idx)
+        inputs.append([0, 0])
+        angles.append(0)
     velocity = [0, 0]
     angle = get_angle(checkpoints[0] - position)
     for step in range(NUMBER_OF_DRIVE_STEPS):
