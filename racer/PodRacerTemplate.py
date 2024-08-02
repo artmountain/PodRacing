@@ -36,7 +36,7 @@ while True:
 
     # Get orientation of pod
     absolute_checkpoint_angle = get_angle(checkpoint_position - position)
-    pod_angle = absolute_checkpoint_angle - math.radians(input_checkpoint_angle)
+    pod_angle = absolute_checkpoint_angle + math.radians(input_checkpoint_angle)
 
     # Update list of checkpoints
     new_checkpoint = True
@@ -51,6 +51,7 @@ while True:
         checkpoints.append(checkpoint_position)
         print(f'New checkpoint', file=sys.stderr, flush=True)
 
+    use_boost = not initialized
     if not initialized:
         sim_pos[0] = x
         sim_pos[1] = y
@@ -98,4 +99,7 @@ while True:
     # Output the target position followed by the power (0 <= thrust <= 100)
     target_position = position + 10000 * np.array((math.sin(target_angle), math.cos(target_angle)))
     outputs = map(round, np.append(target_position, thrust))
-    print(*outputs, 'Get out of my way')
+    if use_boost:
+        print(round(target_position[0]), round(target_position[1]), 'BOOST', 'Get out of my way')
+    else:
+        print(*outputs, 'Get out of my way')
