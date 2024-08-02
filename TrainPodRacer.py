@@ -11,8 +11,8 @@ from PodRacerFunctions import transform_race_data_to_nn_inputs, transform_nn_out
     get_distance
 
 # Test flag
-#TEST = False
-TEST = True
+TEST = False
+#TEST = True
 
 # NN shape data
 RACER_NN_INPUTS = 6
@@ -51,27 +51,17 @@ def evaluate_racer(course, racer, record_path):
         checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - position, angle)
         next_checkpoint_position = checkpoints[(next_checkpoint_idx + 1) % len(checkpoints)]
         next_checkpoint_angle, next_checkpoint_distance = get_relative_angle_and_distance(next_checkpoint_position - position, angle)
-        # TODO - for test only
-        #next_checkpoint_angle = checkpoint_angle
-        #next_checkpoint_distance = 2 * checkpoint_distance
 
-        print(velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance)
         nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance)
         nn_outputs = racer.evaluate(nn_inputs)
         steer, thrust = transform_nn_outputs_to_instructions(nn_outputs)
-        # TODO :  For rest only
-        #if step == 0:
-        #    steer = 0
-        #    thrust = 100
-        print(math.degrees(steer), thrust)
-        print(position)
 
         if record_path:
             path.append(deepcopy(position))
             next_checkpoints.append(next_checkpoint_idx)
             inputs.append([round(math.degrees(steer)), thrust])
             angles.append(math.degrees(angle))
-        position, velocity, angle, hit_checkpoint = evaluate_game_step(position, velocity, angle, checkpoint_position, angle - steer, thrust)
+        position, velocity, angle, hit_checkpoint = evaluate_game_step(position, velocity, angle, checkpoint_position, angle + steer, thrust)
         if hit_checkpoint:
             next_checkpoint_idx += 1
 
