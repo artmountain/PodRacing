@@ -81,7 +81,7 @@ while True:
         steer, thrust = transform_nn_outputs_to_instructions(nn_outputs)
         print(f'Steer: {round(math.degrees(steer))} Thrust: {thrust}', file=sys.stderr, flush=True)
         # Grid in Codingame is inverted - need to subtract the steer angle
-        target_angle = sim_angle - steer
+        target_angle = sim_angle + steer
 
     # Record state
     print(x == sim_pos[0], y == sim_pos[1], file=sys.stderr, flush=True)
