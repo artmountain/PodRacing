@@ -24,12 +24,15 @@ class Course:
 
 
 def create_courses(number_of_courses):
+    number_of_checkpoints = np.random.randint(3, 6)
+    # TODO remove this
+    print(f'Number of checkpoints : {number_of_checkpoints}')
     courses = []
     for i in range(number_of_courses):
-        checkpoints_x = sample(range(1, 16), 3)
-        checkpoints_y = sample(range(1, 8), 3)
+        checkpoints_x = sample(range(1, 16), number_of_checkpoints)
+        checkpoints_y = sample(range(1, 8), number_of_checkpoints)
         start_position = np.array((1000 * randint(1, 15), 1000 * randint(1, 8)))
-        courses.append(Course([np.array((1000 * checkpoints_x[j], 1000 * checkpoints_y[j])) for j in range(3)], start_position))
+        courses.append(Course([np.array((1000 * checkpoints_x[j], 1000 * checkpoints_y[j])) for j in range(number_of_checkpoints)], start_position))
 
     return courses
 
