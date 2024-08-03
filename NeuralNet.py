@@ -66,10 +66,14 @@ class NeuralNetwork:
         return network_data[-1]
 
     @staticmethod
-    def create_from_json(json_str):
+    def create_from_json(json_str, nn_shape):
         nn_data = json.loads(json_str)
-        return NeuralNetwork(6, 2, [np.array(nn_data['weights_0']), np.array(nn_data['weights_1'])],
-                             [np.array(nn_data['biases_0']), np.array(nn_data['biases_1'])])
+        weights = []
+        biases = []
+        for i in range(len(nn_shape) - 1):
+            weights.append(np.array(nn_data[f'weights_{i}']))
+            biases.append(np.array(nn_data[f'biases_{i}']))
+        return NeuralNetwork(6, 2, weights, biases)
 
     # Fitting below this line
 

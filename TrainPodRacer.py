@@ -14,14 +14,12 @@ from PodRacerFunctions import transform_race_data_to_nn_inputs, transform_nn_out
 TEST = False
 #TEST = True
 
-# NN shape data
+# NN config. First entry is size of inputs. Others are number of nodes in each layer
 RACER_NN_INPUTS = 6
 RACER_NN_OUTPUTS = 2
-RACER_NN_LAYERS = 2
-#RACER_MID_LAYER_SIZE = 4
-#RACER_NN_LAYER_SIZES = [RACER_NN_INPUTS, RACER_MID_LAYER_SIZE, RACER_NN_OUTPUTS]
-RACER_NN_LAYER_SIZES = [RACER_NN_INPUTS, RACER_NN_OUTPUTS]
-RACER_NN_INPUT_SIZES = [RACER_NN_INPUTS] + RACER_NN_LAYER_SIZES[:len(RACER_NN_LAYER_SIZES) - 1]
+RACER_MID_LAYER_SIZE = 4
+RACER_NN_CONFIG = [RACER_NN_INPUTS, RACER_NN_INPUTS, RACER_MID_LAYER_SIZE, RACER_NN_OUTPUTS]
+#RACER_NN_CONFIG = [RACER_NN_INPUTS, RACER_NN_INPUTS, RACER_NN_OUTPUTS]
 
 # Training configuration
 POPULATION_SIZE = 5 if TEST else 50
@@ -74,25 +72,25 @@ def score_racer(racer, courses):
 
 def get_gene_from_racer(racer):
     gene = []
-    for layer in range(RACER_NN_LAYERS):
-        for neuron in range(RACER_NN_LAYER_SIZES[layer]):
-            gene += racer.neurons[layer][neuron].weights.tolist()
-        for neuron in range(RACER_NN_LAYER_SIZES[layer]):
-            gene.append(racer.neurons[layer][neuron].bias)
+    for layer in range(1, len(RACER_NN_CONFIG)):
+        for neuron in range(RACER_NN_CONFIG[layer]):
+            gene += racer.neurons[layer - 1][neuron].weights.tolist()
+        for neuron in range(RACER_NN_CONFIG[layer]):
+            gene.append(racer.neurons[layer - 1][neuron].bias)
     return gene
 
 def build_racer_from_gene(gene):
     weights = []
     biases = []
     gene_index = 0
-    for layer in range(RACER_NN_LAYERS):
+    for layer in range(1, len(RACER_NN_CONFIG)):
         weights_this_layer = []
-        for neuron in range(RACER_NN_LAYER_SIZES[layer]):
-            weights_this_layer.append(np.array(gene[gene_index:gene_index + RACER_NN_INPUT_SIZES[layer]]))
-            gene_index += RACER_NN_INPUT_SIZES[layer]
+        for neuron in range(RACER_NN_CONFIG[layer]):
+            weights_this_layer.append(np.array(gene[gene_index:gene_index + RACER_NN_CONFIG[layer - 1]]))
+            gene_index += RACER_NN_CONFIG[layer - 1]
         weights.append(weights_this_layer)
-        biases.append(deepcopy(gene[gene_index:gene_index + RACER_NN_LAYER_SIZES[layer]]))
-        gene_index += RACER_NN_LAYER_SIZES[layer]
+        biases.append(deepcopy(gene[gene_index:gene_index + RACER_NN_CONFIG[layer]]))
+        gene_index += RACER_NN_CONFIG[layer]
     racer = NeuralNetwork(RACER_NN_INPUTS, RACER_NN_OUTPUTS, weights, biases)
     return racer
 
@@ -103,13 +101,15 @@ def train_pod_racer(output_file, racers_seed_file):
         # Start from pre-configured racers
         with open(racers_seed_file, 'r') as f:
             for line in f.readlines():
-                racer = NeuralNetwork.create_from_json(line.rstrip())
+                racer = NeuralNetwork.create_from_json(line.rstrip(), RACER_NN_CONFIG)
                 score = score_racer(racer, courses)
                 gene = get_gene_from_racer(racer)
                 racers.append([racer, score, gene])
 
     # Start from a set of random racers
-    gene_length = RACER_NN_LAYER_SIZES[0] * (RACER_NN_INPUTS + 1) + RACER_NN_LAYER_SIZES[1] * (RACER_NN_LAYER_SIZES[0] + 1)
+    gene_length = 0
+    for layer in range(1, len(RACER_NN_CONFIG)):
+        gene_length += (RACER_NN_CONFIG[layer - 1] + 1) * RACER_NN_CONFIG[layer]
     for _i in range(POPULATION_SIZE - len(racers)):
         gene = np.random.rand(gene_length) * 2 - 1
         racer = build_racer_from_gene(gene)
