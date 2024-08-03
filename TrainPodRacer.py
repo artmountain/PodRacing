@@ -18,13 +18,16 @@ TEST = False
 RACER_NN_INPUTS = 6
 RACER_NN_OUTPUTS = 2
 RACER_NN_LAYERS = 2
+#RACER_MID_LAYER_SIZE = 4
+#RACER_NN_LAYER_SIZES = [RACER_NN_INPUTS, RACER_MID_LAYER_SIZE, RACER_NN_OUTPUTS]
 RACER_NN_LAYER_SIZES = [RACER_NN_INPUTS, RACER_NN_OUTPUTS]
+RACER_NN_INPUT_SIZES = [RACER_NN_INPUTS] + RACER_NN_LAYER_SIZES[:len(RACER_NN_LAYER_SIZES) - 1]
 
 # Training configuration
 POPULATION_SIZE = 5 if TEST else 50
 NUMBER_OF_DRIVE_STEPS = 10 if TEST else 200
 NUMBER_OF_TRAINING_COURSES = 5
-NUMBER_OF_RACER_GENERATIONS = 10 if TEST else 100
+NUMBER_OF_RACER_GENERATIONS = 10 if TEST else 1000
 NUMBER_OF_RACER_MUTATIONS = 10
 NN_MUTATION_RATE = 0.05
 RANDOM_VARIATION = 0.2
@@ -74,7 +77,7 @@ def score_racer(racer, courses):
 
 def get_gene_from_racer(racer):
     gene = []
-    for layer in range(RACER_NN_LAYERS):  # TODO : make this work for generic NN shape
+    for layer in range(RACER_NN_LAYERS):
         for neuron in range(RACER_NN_LAYER_SIZES[layer]):
             gene += racer.neurons[layer][neuron].weights.tolist()
         for neuron in range(RACER_NN_LAYER_SIZES[layer]):
@@ -85,29 +88,15 @@ def build_racer_from_gene(gene):
     weights = []
     biases = []
     gene_index = 0
-    for layer in range(RACER_NN_LAYERS):  # TODO : make this work for generic NN shape
+    for layer in range(RACER_NN_LAYERS):
         weights_this_layer = []
         for neuron in range(RACER_NN_LAYER_SIZES[layer]):
-            weights_this_layer.append(np.array(gene[gene_index:gene_index + RACER_NN_INPUTS]))
-            gene_index += RACER_NN_INPUTS
+            weights_this_layer.append(np.array(gene[gene_index:gene_index + RACER_NN_INPUT_SIZES[layer]]))
+            gene_index += RACER_NN_INPUT_SIZES[layer]
         weights.append(weights_this_layer)
         biases.append(deepcopy(gene[gene_index:gene_index + RACER_NN_LAYER_SIZES[layer]]))
         gene_index += RACER_NN_LAYER_SIZES[layer]
     racer = NeuralNetwork(RACER_NN_INPUTS, RACER_NN_OUTPUTS, weights, biases)
-
-    # todo delete this
-    # Raw inputs: velocity angle - 0.16660511143502532, speed: 386.0 chckpointAngle: 1 Checkpoint dist: 4525
-    # Next ch angle: 1 Next cp dist: 9050
-    # nn_inputs = [-0.023405394134784374, 0.20576131687242802, 3.641592653589793, 0.18099547511312217, 3.641592653589793, 0.09950248756218905]
-    # Expected outputs: [0.9955969072301777, 0.9997648951557021]
-    # Steer: 18 Thrust: 99.97648951557021
-
-    # Raw inputs: velocity angle 0.1156067530693281, speed: 412.0 chckpointAngle: -17 Checkpoint dist: 4047 Next ch angle: -17 Next cp dist: 8094    NN
-    # inputs2 = [0.8631893261479704, 0.1953125, -52.90707511102649, 0.19813750743015654, -52.90707511102649, 0.10996261271167804]
-    # Expected outputs: [0.002197640358129282, 0.6264850778985115]
-    # Steer: -18 Thrust: 62.64850778985115
-
-
     return racer
 
 def train_pod_racer(output_file, racers_seed_file):
