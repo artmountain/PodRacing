@@ -40,12 +40,10 @@ def evaluate_racer(course, racer, record_path):
     path = []
     next_checkpoints = []
     inputs = []
-    angles = []  # todo remove when bug fixed
     if record_path:
         path.append(deepcopy(position))
         next_checkpoints.append(next_checkpoint_idx)
         inputs.append([0, 0])
-        angles.append(0)
     velocity = [0, 0]
     angle = get_angle(checkpoints[0] - position)
     for step in range(NUMBER_OF_DRIVE_STEPS):
@@ -63,14 +61,13 @@ def evaluate_racer(course, racer, record_path):
             path.append(deepcopy(position))
             next_checkpoints.append(next_checkpoint_idx)
             inputs.append([round(math.degrees(steer)), thrust])
-            angles.append(math.degrees(angle))
         position, velocity, angle, hit_checkpoint = evaluate_game_step(position, velocity, angle, checkpoint_position, angle + steer, thrust)
         if hit_checkpoint:
             next_checkpoint_idx += 1
 
     distance_to_next_checkpoint = get_distance(checkpoints[next_checkpoint_idx % len(checkpoints)] - position)
     score = 100 * (next_checkpoint_idx + transform_distance_to_input(distance_to_next_checkpoint))
-    return score, next_checkpoint_idx, path, next_checkpoints, inputs, angles
+    return score, next_checkpoint_idx, path, next_checkpoints, inputs
 
 def score_racer(racer, courses):
     return np.mean([evaluate_racer(course, racer, False)[0] for course in courses])
@@ -175,7 +172,7 @@ def train_pod_racer(output_file, racers_seed_file):
 
         # Output results of best racer
         for i in range(len(courses)):
-            score, next_checkpoint_idx, path, next_checkpoints, inputs, angles = evaluate_racer(courses[i], racers[0][0], False)
+            score, next_checkpoint_idx, path, next_checkpoints, inputs = evaluate_racer(courses[i], racers[0][0], False)
             print(f'Best racer course {i}. Score {score}, Checkpoint {next_checkpoint_idx}')
 
     # Output best racers
