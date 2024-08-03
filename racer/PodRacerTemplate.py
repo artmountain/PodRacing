@@ -8,7 +8,8 @@ import sys
 
 # Build neural network
 nn_data_str = '% INSERT RACER NN CONFIG %'
-racer = NeuralNetwork.create_from_json(nn_data_str)
+nn_shape = (6, 6, 2)
+racer = NeuralNetwork.create_from_json(nn_data_str, nn_shape)
 
 # game loop
 sim_pos = np.array((0, 0))
@@ -97,8 +98,5 @@ while True:
 
     # Output the target position followed by the power (0 <= thrust <= 100)
     target_position = position + 10000 * np.array((math.sin(target_angle), math.cos(target_angle)))
-    outputs = map(round, np.append(target_position, thrust))
-    if use_boost:
-        print(round(target_position[0]), round(target_position[1]), 'BOOST', 'Get out of my way')
-    else:
-        print(*outputs, 'Get out of my way')
+    outputs = np.append(list(map(round, target_position)), 'BOOST') if use_boost else map(round, np.append(target_position, thrust))
+    print(*outputs, 'Get out of my way')
