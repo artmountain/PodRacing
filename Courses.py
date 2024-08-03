@@ -25,8 +25,6 @@ class Course:
 
 def create_courses(number_of_courses):
     number_of_checkpoints = np.random.randint(3, 6)
-    # TODO remove this
-    print(f'Number of checkpoints : {number_of_checkpoints}')
     courses = []
     for i in range(number_of_courses):
         checkpoints_x = sample(range(1, 16), number_of_checkpoints)
