@@ -6,8 +6,9 @@ import numpy as np
 
 from Courses import create_courses
 from NeuralNet import NeuralNetwork
+from PodRaceSimulator import PodRaceSimulator
 from PodRacerFunctions import transform_race_data_to_nn_inputs, transform_nn_outputs_to_instructions, \
-    evaluate_game_step, transform_distance_to_input, get_angle, get_relative_angle_and_distance, \
+    transform_distance_to_input, get_angle, get_relative_angle_and_distance, \
     get_distance
 
 # Test flag
@@ -44,6 +45,7 @@ def evaluate_racer(course, racer, record_path):
         inputs.append([0, 0])
     velocity = [0, 0]
     angle = get_angle(checkpoints[0] - position)
+    simulator = PodRaceSimulator()
     for step in range(NUMBER_OF_DRIVE_STEPS):
         velocity_angle, speed = get_relative_angle_and_distance(velocity, angle)
         checkpoint_position = checkpoints[next_checkpoint_idx % len(checkpoints)]
@@ -59,7 +61,7 @@ def evaluate_racer(course, racer, record_path):
             path.append(deepcopy(position))
             next_checkpoints.append(next_checkpoint_idx)
             inputs.append([round(math.degrees(steer)), thrust])
-        position, velocity, angle, hit_checkpoint = evaluate_game_step(position, velocity, angle, checkpoint_position, angle + steer, thrust)
+        position, velocity, angle, hit_checkpoint = simulator.single_step(position, velocity, angle, checkpoint_position, angle + steer, thrust)
         if hit_checkpoint:
             next_checkpoint_idx += 1
 

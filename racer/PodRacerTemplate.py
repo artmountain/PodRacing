@@ -5,6 +5,7 @@ import sys
 
 # INSERT GAME FUNCTIONS
 
+# INSERT SIMULATOR
 
 # Build neural network
 nn_data_str = '% INSERT RACER NN CONFIG %'
@@ -23,6 +24,7 @@ checkpoint_index = 0
 last_checkpoint_position = np.array((-1, -1))
 seen_all_checkpoints = False
 checkpoints = []
+simulator = PodRaceSimulator()
 count = 0
 while True:
     # next_checkpoint_x: x position of the next check point
@@ -84,8 +86,8 @@ while True:
                                                      next_checkpoint_angle, next_checkpoint_distance)
         print(f'Raw inputs: velocity angle {velocity_angle}, speed : {speed}  chckpointAngle: {checkpoint_angle}  Checkpoint dist: {checkpoint_distance} Next ch angle: {next_checkpoint_angle}  Next cp dist: {next_checkpoint_distance}', file=sys.stderr, flush=True)
         nn_outputs = racer.evaluate(nn_inputs)
-        print(f'NN inputs: {nn_inputs}', file=sys.stderr, flush=True)
-        print(f'NN outputs: {nn_outputs}', file=sys.stderr, flush=True)
+        #print(f'NN inputs: {nn_inputs}', file=sys.stderr, flush=True)
+        #print(f'NN outputs: {nn_outputs}', file=sys.stderr, flush=True)
 
         nn_outputs = racer.evaluate(nn_inputs)
         steer, thrust = transform_nn_outputs_to_instructions(nn_outputs)
@@ -99,7 +101,7 @@ while True:
           file=sys.stderr, flush=True)
 
     # Simulate move - simulator works in radians
-    sim_pos, velocity, pod_angle, hit_checkpoint = evaluate_game_step(position, velocity, pod_angle, checkpoint_position, target_angle, thrust)
+    sim_pos, velocity, pod_angle, hit_checkpoint = simulator.single_step(position, velocity, pod_angle, checkpoint_position, target_angle, thrust)
 
     # Store current position
     last_position = position

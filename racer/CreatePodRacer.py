@@ -1,8 +1,3 @@
-# INSERT NEURAL NETWORK CODE
-
-# INSERT GAME FUNCTIONS
-
-# STOP!
 if __name__ == '__main__':
     with open('../racer/codingame_file/PodRacer.py', 'w') as racer:
         with open('../../PodRacing/racer/PodRacerTemplate.py', 'r') as template:
@@ -19,6 +14,11 @@ if __name__ == '__main__':
                         for functions_line in functions:
                             if not 'import ' in functions_line:
                                 racer.write(functions_line)
+                elif '# INSERT SIMULATOR' in line:
+                    with open('../PodRaceSimulator.py', 'r') as simulator:
+                        for simulator_line in simulator:
+                            if not 'import ' in simulator_line:
+                                racer.write(simulator_line)
                 elif '# REMOVE THIS lINE' not in line:
                     if '% INSERT RACER NN CONFIG %' in line:
                         with open('../nn_data/live_racer_nn_config.txt', 'r') as nn_config:
