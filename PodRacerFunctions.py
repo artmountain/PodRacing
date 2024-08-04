@@ -66,6 +66,10 @@ def update_angle(current_angle, target_angle):
 
 # Angles all in radians
 def evaluate_game_step(current_position, current_velocity, old_angle, next_checkpoint_pos, input_angle, new_thrust):
+    # Process BOOST
+    if new_thrust == 'BOOST':
+        new_thrust = 650
+
     # Calculate new angle
     new_angle = update_angle(old_angle, input_angle)
 

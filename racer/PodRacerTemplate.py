@@ -15,6 +15,7 @@ racer = NeuralNetwork.create_from_json(nn_data_str, nn_shape)
 # game loop
 sim_pos = np.array((0, 0))
 velocity = np.zeros(2)
+last_position = None
 thrust = 0
 target_angle = 0
 initialized = False
@@ -22,6 +23,7 @@ checkpoint_index = 0
 last_checkpoint_position = np.array((-1, -1))
 seen_all_checkpoints = False
 checkpoints = []
+count = 0
 while True:
     # next_checkpoint_x: x position of the next check point
     # next_checkpoint_y: y position of the next check point
@@ -67,6 +69,7 @@ while True:
         # Create neural network inputs
         # [Checkpoint angle, Checkpoint distance, direction, speed, new_angle, thrust]
         # Angles are relative to current heading and are all in radians except the input checkpoint angle
+        velocity = np.trunc((position - last_position) * 0.85)
         velocity_angle, speed = get_relative_angle_and_distance(velocity, pod_angle)
         checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - position, pod_angle)
         # Check my view of angle to checkpoint vs the game - note game takes things to the R as +ve angles
@@ -86,6 +89,7 @@ while True:
 
         nn_outputs = racer.evaluate(nn_inputs)
         steer, thrust = transform_nn_outputs_to_instructions(nn_outputs)
+        thrust = round(thrust)
         print(f'Steer: {round(math.degrees(steer))} Thrust: {thrust}', file=sys.stderr, flush=True)
         target_angle = pod_angle + steer
 
@@ -97,7 +101,10 @@ while True:
     # Simulate move - simulator works in radians
     sim_pos, velocity, pod_angle, hit_checkpoint = evaluate_game_step(position, velocity, pod_angle, checkpoint_position, target_angle, thrust)
 
+    # Store current position
+    last_position = position
+
     # Output the target position followed by the power (0 <= thrust <= 100)
-    target_position = position + 10000 * np.array((math.sin(target_angle), math.cos(target_angle)))
-    outputs = np.append(list(map(round, target_position)), 'BOOST') if use_boost else map(round, np.append(target_position, thrust))
+    target_position = list(map(round, position + 10000 * np.array((math.sin(target_angle), math.cos(target_angle)))))
+    outputs = np.append(target_position, thrust)
     print(*outputs, 'Get out of my way')
