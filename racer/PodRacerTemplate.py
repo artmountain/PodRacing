@@ -8,7 +8,8 @@ import sys
 
 # Build neural network
 nn_data_str = '% INSERT RACER NN CONFIG %'
-nn_shape = (6, 6, 2)
+#nn_shape = (6, 6, 2)
+nn_shape = (6, 6, 4, 2)
 racer = NeuralNetwork.create_from_json(nn_data_str, nn_shape)
 
 # game loop
