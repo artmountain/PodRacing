@@ -64,7 +64,7 @@ while True:
         print(f'Start angle : {round(math.degrees(pod_angle))}', file=sys.stderr, flush=True)
         print(f'Input checkpoint angle : {input_checkpoint_angle}', file=sys.stderr, flush=True)
         steer = 0
-        thrust = 100
+        thrust = 'BOOST'
         target_angle = pod_angle
         initialized = True
     else:
