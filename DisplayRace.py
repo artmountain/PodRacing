@@ -17,8 +17,8 @@ TIME_PER_FRAME = 0.05
 
 def generate_and_display_race(racer_config):
     racer_nn_data = json.loads(racer_config)
-    racer_nn = NeuralNetwork(6, 2, [racer_nn_data['weights_0'], racer_nn_data['weights_1']],
-                               [racer_nn_data['biases_0'], racer_nn_data['biases_1']])
+    racer_nn = NeuralNetwork(6, 2, [racer_nn_data['weights_0'], racer_nn_data['weights_1'], racer_nn_data['weights_2']],
+                             [racer_nn_data['biases_0'], racer_nn_data['biases_1'], racer_nn_data['biases_2']])
     course = create_courses(1)[0]
     score, next_checkpoint_idx, path, next_checkpoints, inputs = evaluate_racer(course, racer_nn, True)
     plot_pod_race(course.checkpoints, path, next_checkpoints, inputs)
