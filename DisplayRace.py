@@ -82,4 +82,4 @@ def plot_pod_paths(checkpoints, paths, pause_time):
     plt.close()
 
 if __name__ == '__main__':
-    generate_and_display_race(open('nn_data/racer_config_test.txt').readlines()[0])
+    generate_and_display_race(open('nn_data/racer_config.txt').readlines()[0])
