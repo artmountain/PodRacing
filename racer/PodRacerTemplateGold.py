@@ -90,7 +90,7 @@ while True:
 
         # On the first go through, override the calculated values
         if last_positions is None:
-            target_angle = pod.angle
+            target_angle = checkpoint_angle
             thrust = 100
 
         # Record state
