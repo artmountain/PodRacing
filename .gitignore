@@ -131,8 +131,9 @@ static/icons/
 # IntellijIdea
 \.idea
 
-# Auto-generated file
+# Auto-generated files
 racer/codingame_file/PodRacer.py
+racer/codingame_file/PodRacerGold.py
 
 # Calibrated neural net data
 nn_data
