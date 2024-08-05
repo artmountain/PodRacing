@@ -43,10 +43,13 @@ while True:
         # angle: angle of your pod
         # next_check_point_id: next check point id of your pod
         x, y, vx, vy, angle, next_checkpoint_id = [int(j) for j in input().split()]
+        print(f'Pod angle pre : {angle}', file=sys.stderr, flush=True)
+        pod_angle = math.radians((270 - angle) % 360 - 180)
+        print(f'Pod angle post : {round(math.degrees(pod_angle))}', file=sys.stderr, flush=True)
         position = np.array((x, y))
-        velocity = np.zeros(2) if last_positions is None else np.trunc((position - last_positions[i]) * 0.85)
+        velocity = np.array((vx, vy))
         absolute_checkpoint_angle = get_angle(checkpoints[next_checkpoint_id] - position)
-        pod_angle = absolute_checkpoint_angle + math.radians(angle)
+        print(f'Pod angle : {round(math.degrees(pod_angle))}  Input angle : {angle}  CP angle : {round(math.degrees(absolute_checkpoint_angle))}', file=sys.stderr, flush=True)
         pods.append(Pod(position, velocity, pod_angle, next_checkpoint_id))
     for i in range(2):
         # x_2: x position of the opponent's pod
@@ -66,11 +69,11 @@ while True:
         # Angles are relative to current heading and are all in radians except the input checkpoint angle
         #print(f'Last position: {last_position}, position : {position}  velocity: {velocity}', file=sys.stderr, flush=True)
         velocity_angle, speed = get_relative_angle_and_distance(pod.velocity, pod.angle)
+        print(f'velocity : {pod.velocity} angle : {round(math.degrees(pod.angle))}  vel angle : {round(math.degrees(velocity_angle))}', file=sys.stderr, flush=True)
         checkpoint_position = checkpoints[pod.next_checkpoint_id]
         checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - pod.position, pod.angle)
         # Check my view of angle to checkpoint vs the game - note game takes things to the R as +ve angles
         print(f'My angle to cp : {-round(math.degrees(checkpoint_angle))}, system angle to cp : {round(math.degrees(pod.angle))}', file=sys.stderr, flush=True)
-        #print(f'My angle : {round(math.degrees(pod.angle))}, velocity angle : {round(math.degrees(velocity_angle))}', file=sys.stderr, flush=True)
         next_checkpoint_position = checkpoints[(pod.next_checkpoint_id + 1) % checkpoint_count]
         next_checkpoint_angle, next_checkpoint_distance = get_relative_angle_and_distance(next_checkpoint_position - pod.position, pod.angle)
         nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance,
