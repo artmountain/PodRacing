@@ -25,17 +25,17 @@ class PodRaceSimulator:
         return new_angle
 
     # Angles all in radians
-    def single_step(self, current_position, current_velocity, old_angle, next_checkpoint_pos, input_angle, new_thrust):
+    def single_step(self, current_position, current_velocity, old_angle, next_checkpoint_pos, input_angle, thrust, command):
         # Process BOOST
-        if new_thrust == 'BOOST' and not self.boost_used:
-            new_thrust = 650
+        if command == 'BOOST' and not self.boost_used:
+            thrust = 650
             self.boost_used = True
 
         # Calculate new angle
         new_angle = self.update_angle(old_angle, input_angle)
 
         # Calculate thrust and update speed
-        thrust_v = new_thrust * np.array((math.sin(new_angle), math.cos(new_angle)))
+        thrust_v = thrust * np.array((math.sin(new_angle), math.cos(new_angle)))
         new_velocity = current_velocity + thrust_v
 
         # Move

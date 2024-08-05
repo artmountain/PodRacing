@@ -17,7 +17,7 @@ TEST = False
 
 # NN config. First entry is size of inputs. Others are number of nodes in each layer
 RACER_NN_INPUTS = 6
-RACER_NN_OUTPUTS = 2
+RACER_NN_OUTPUTS = 3
 RACER_MID_LAYER_SIZE = 4
 RACER_NN_CONFIG = [RACER_NN_INPUTS, RACER_NN_INPUTS, RACER_MID_LAYER_SIZE, RACER_NN_OUTPUTS]
 #RACER_NN_CONFIG = [RACER_NN_INPUTS, RACER_NN_INPUTS, RACER_NN_OUTPUTS]
@@ -25,8 +25,8 @@ RACER_NN_CONFIG = [RACER_NN_INPUTS, RACER_NN_INPUTS, RACER_MID_LAYER_SIZE, RACER
 # Training configuration
 POPULATION_SIZE = 5 if TEST else 50
 NUMBER_OF_DRIVE_STEPS = 10 if TEST else 200
-NUMBER_OF_TRAINING_COURSES = 5
-NUMBER_OF_RACER_GENERATIONS = 10 if TEST else 1000
+NUMBER_OF_TRAINING_COURSES = 10
+NUMBER_OF_RACER_GENERATIONS = 10 if TEST else 500
 NUMBER_OF_RACER_MUTATIONS = 10
 NN_MUTATION_RATE = 0.05
 RANDOM_VARIATION = 0.2
@@ -55,13 +55,14 @@ def evaluate_racer(course, racer, record_path):
 
         nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance)
         nn_outputs = racer.evaluate(nn_inputs)
-        steer, thrust = transform_nn_outputs_to_instructions(nn_outputs)
+        steer, thrust, command = transform_nn_outputs_to_instructions(nn_outputs)
 
         if record_path:
             path.append(deepcopy(position))
             next_checkpoints.append(next_checkpoint_idx)
-            inputs.append([round(math.degrees(steer)), thrust])
-        position, velocity, angle, hit_checkpoint = simulator.single_step(position, velocity, angle, checkpoint_position, angle + steer, thrust)
+            inputs.append([round(math.degrees(steer)), int(thrust) if command is None else command])
+            print(inputs[-1][0], inputs[-1][1], nn_outputs[2])  # todo
+        position, velocity, angle, hit_checkpoint = simulator.single_step(position, velocity, angle, checkpoint_position, angle + steer, thrust, command)
         if hit_checkpoint:
             next_checkpoint_idx += 1
 
@@ -124,18 +125,24 @@ def train_pod_racer(output_file, racers_seed_file):
         courses = create_courses(NUMBER_OF_TRAINING_COURSES)
 
         # Update scores for existing racers
+        '''
         for racer_idx in range(POPULATION_SIZE):
             score = score_racer(racers[racer_idx][0], courses)
             new_score = 0.8 * racers[racer_idx][1] + 0.2 * score
             racers[racer_idx][1] = new_score
+        '''
 
         # Create and evaluate the next generation - first create new racers by mutation and replace parent if better
+        new_racers = []
         for racer_idx in range(POPULATION_SIZE):
             new_racer = racers[racer_idx][0].mutate(NN_MUTATION_RATE)
             score = score_racer(new_racer, courses)
-            if score > racers[racer_idx][1]:
-                new_racer_gene = get_gene_from_racer(new_racer)
-                racers[racer_idx] = [new_racer, score, new_racer_gene]
+            new_racer_gene = get_gene_from_racer(new_racer)
+            new_racers.append([racers[racer_idx][0].mutate(NN_MUTATION_RATE), score, new_racer_gene])
+
+            #if score > racers[racer_idx][1]:
+            #    new_racer_gene = get_gene_from_racer(new_racer)
+            #    racers[racer_idx] = [new_racer, score, new_racer_gene]
 
         # Now breed racers
         new_genes = []
@@ -161,21 +168,29 @@ def train_pod_racer(output_file, racers_seed_file):
             new_genes.append(child_gene_scale)
             new_genes.append(child_gene_splice)
 
-        # Score and add new racers
+        # Create racers from genes and score them
         for gene in new_genes:
-            racer = build_racer_from_gene(gene)
-            score = score_racer(racer, courses)
-            racers.append([racer, score, gene])
+            new_racer = build_racer_from_gene(gene)
+            score = score_racer(new_racer, courses)
+            new_racers.append([new_racer, score, gene])
+
+        # Add the best racer from the previous generation
+        best_racer = racers[0]
+        score = score_racer(best_racer[0], courses)
+        emwa_score = best_racer[1] * 0.8 + 0.2 * score
+        new_racers.append([best_racer[0], emwa_score, best_racer[2]])
 
         # Filter and select best of population
-        racers = sorted(racers, key=lambda x: x[1], reverse=True)[:POPULATION_SIZE]
+        racers = sorted(new_racers, key=lambda x: x[1], reverse=True)[:POPULATION_SIZE]
         print(f'Generation {generation}. Best score: {racers[0][1]}')
         print(f'All scores: {np.around(np.array([r[1] for r in racers]), 2).tolist()}')
 
         # Output results of best racer
+        '''
         for i in range(len(courses)):
             score, next_checkpoint_idx, path, next_checkpoints, inputs = evaluate_racer(courses[i], racers[0][0], False)
             print(f'Best racer course {i}. Score {score}, Checkpoint {next_checkpoint_idx}')
+        '''
 
     # Output best racers
     best_racer = racers[0][0]

@@ -37,7 +37,7 @@ def plot_pod_race(checkpoints, path, next_checkpoints, inputs):
     pod = plt.Circle((path[0][0], path[0][1]), POD_SIZE, color='b')
     ax.add_patch(pod)
 
-    output_template = 'round %i  steer %i  thrust %i  next checkpoint %i'
+    output_template = 'round %i  steer %i  thrust %s  next checkpoint %i'
     output_text = ax.text(0.05, 0.9, '', transform=ax.transAxes)
 
     def init():
@@ -50,11 +50,11 @@ def plot_pod_race(checkpoints, path, next_checkpoints, inputs):
 
     def animate(i):
         pod.center = (path[i][0], path[i][1])
-        angle, thrust = map(int, inputs[min(i, len(inputs) - 1)])
-        output_text.set_text(output_template % (i, angle, thrust, next_checkpoints[i]))
+        angle, thrust = inputs[min(i, len(inputs) - 1)]
+        output_text.set_text(output_template % (i, angle, str(thrust), next_checkpoints[i]))
         return checkpoint_icons[0], checkpoint_icons[1], checkpoint_icons[2], pod, output_text
 
-    ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(path), interval=TIME_PER_FRAME * 1000, blit=True)
+    _ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(path), interval=TIME_PER_FRAME * 1000, blit=True)
     plt.show()
 
 
@@ -80,3 +80,6 @@ def plot_pod_paths(checkpoints, paths, pause_time):
     plt.show(block=False)
     plt.pause(pause_time)
     plt.close()
+
+if __name__ == '__main__':
+    generate_and_display_race(open('nn_data/racer_config_test.txt').readlines()[0])
