@@ -85,7 +85,7 @@ while True:
             next_checkpoint_angle, next_checkpoint_distance = get_relative_angle_and_distance(next_checkpoint_position - position, pod_angle)
         nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance,
                                                      next_checkpoint_angle, next_checkpoint_distance)
-        print(f'Raw inputs: velocity angle {velocity_angle}, speed : {speed}  chckpointAngle: {checkpoint_angle}  Checkpoint dist: {checkpoint_distance} Next ch angle: {next_checkpoint_angle}  Next cp dist: {next_checkpoint_distance}', file=sys.stderr, flush=True)
+        print(f'Raw inputs: velocity angle {velocity_angle}, speed : {speed}  checkpointAngle: {checkpoint_angle}  checkpointDist: {checkpoint_distance} Next ch angle: {next_checkpoint_angle}  Next cp dist: {next_checkpoint_distance}', file=sys.stderr, flush=True)
         nn_outputs = racer.evaluate(nn_inputs)
         #print(f'NN inputs: {nn_inputs}', file=sys.stderr, flush=True)
         #print(f'NN outputs: {nn_outputs}', file=sys.stderr, flush=True)

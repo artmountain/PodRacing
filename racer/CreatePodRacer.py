@@ -1,6 +1,12 @@
+GOLD = True
+
+template_file = '../../PodRacing/racer/' + 'PodRacerTemplateGold.py' if GOLD else 'PodRacerTemplate.py'
+output_file = '../racer/codingame_file/' + 'PodRacerGold.py' if GOLD else 'PodRacer.py'
+
+
 if __name__ == '__main__':
-    with open('../racer/codingame_file/PodRacer.py', 'w') as racer:
-        with open('../../PodRacing/racer/PodRacerTemplate.py', 'r') as template:
+    with open(output_file, 'w') as racer:
+        with open(template_file, 'r') as template:
             for line in template:
                 if '# INSERT NEURAL NETWORK CODE' in line:
                     with open('../NeuralNet.py', 'r') as nn:
