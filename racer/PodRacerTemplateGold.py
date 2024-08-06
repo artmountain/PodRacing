@@ -26,12 +26,14 @@ checkpoints = []
 last_positions = None
 simulators = [PodRaceSimulator(), PodRaceSimulator()]
 sim_pos = [None, None]
+target_opponent_checkpoint = 2
 
 laps = int(input())
 checkpoint_count = int(input())
 for i in range(checkpoint_count):
     checkpoint_x, checkpoint_y = [int(j) for j in input().split()]
     checkpoints.append(np.array((checkpoint_x, checkpoint_y)))
+print(f'Checkpoints: {checkpoints}', file=sys.stderr, flush=True)
 
 while True:
     pods = []
@@ -51,6 +53,7 @@ while True:
         absolute_checkpoint_angle = get_angle(checkpoints[next_checkpoint_id] - position)
         print(f'Pod angle : {round(math.degrees(pod_angle))}  Input angle : {angle}  CP angle : {round(math.degrees(absolute_checkpoint_angle))}', file=sys.stderr, flush=True)
         pods.append(Pod(position, velocity, pod_angle, next_checkpoint_id))
+    opponent_pods = []
     for i in range(2):
         # x_2: x position of the opponent's pod
         # y_2: y position of the opponent's pod
@@ -59,6 +62,9 @@ while True:
         # angle_2: angle of the opponent's pod
         # next_check_point_id_2: next check point id of the opponent's pod
         x_2, y_2, vx_2, vy_2, angle_2, next_check_point_id_2 = [int(j) for j in input().split()]
+        pod_angle = math.radians((270 - angle) % 360 - 180)
+        opponent_pods.append(Pod(np.array((x_2, y_2)), np.array((vx_2, vy_2)), pod_angle, next_check_point_id_2))
+    lead_opponend_pod = opponent_pods[0 if opponent_pods[0].next_checkpoint_id > opponent_pods[1].next_checkpoint_id else 1]
 
     outputs = []
     for pod_index in range(2):
@@ -92,6 +98,15 @@ while True:
         if last_positions is None:
             target_angle = checkpoint_angle
             thrust = 100
+
+        # 2nd pod will just target the lead opponent
+        if pod_index == 1:
+            if target_opponent_checkpoint == (lead_opponend_pod.next_checkpoint_id - 1) % checkpoint_count:
+                target_opponent_checkpoint = (lead_opponend_pod.next_checkpoint_id + 1) % checkpoint_count
+            target = lead_opponend_pod.position if target_opponent_checkpoint == lead_opponend_pod.next_checkpoint_id else checkpoints[target_opponent_checkpoint]
+            target_angle, opponent_distance = get_relative_angle_and_distance(target - pod.position, 0)
+            thrust = min(100, int(opponent_distance / 50))
+            command = None
 
         # Record state
         if last_positions is not None:
