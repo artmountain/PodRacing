@@ -12,29 +12,19 @@ nn_data_str = '% INSERT RACER NN CONFIG %'
 nn_shape = (6, 6, 4, 3)
 racer = NeuralNetwork.create_from_json(nn_data_str, nn_shape)
 
-class Pod:
-    def __init__(self, position, velocity, angle, next_checkpoint_id):
-        self.position = position
-        self.velocity = velocity
-        self.angle = angle
-        self.next_checkpoint_id = next_checkpoint_id
-
-        self.boost_used = False
-
-# game loop
-checkpoints = []
-last_positions = None
-simulators = [PodRaceSimulator(), PodRaceSimulator()]
-sim_pos = [None, None]
-target_opponent_checkpoint = 2
-
 laps = int(input())
 checkpoint_count = int(input())
+checkpoints = []
 for i in range(checkpoint_count):
     checkpoint_x, checkpoint_y = [int(j) for j in input().split()]
     checkpoints.append(np.array((checkpoint_x, checkpoint_y)))
 print(f'Checkpoints: {checkpoints}', file=sys.stderr, flush=True)
 
+last_positions = None
+sim_pos = [None, None]
+target_opponent_checkpoint = 2
+
+# game loop
 while True:
     pods = []
     for i in range(2):
@@ -65,6 +55,8 @@ while True:
         pod_angle = math.radians((270 - angle) % 360 - 180)
         opponent_pods.append(Pod(np.array((x_2, y_2)), np.array((vx_2, vy_2)), pod_angle, next_check_point_id_2))
     lead_opponend_pod = opponent_pods[0 if opponent_pods[0].next_checkpoint_id > opponent_pods[1].next_checkpoint_id else 1]
+
+    simulators = [PodRaceSimulator(checkpoints, [pods[0]]), PodRaceSimulator(checkpoints, [pods[1]])]
 
     outputs = []
     for pod_index in range(2):
@@ -110,11 +102,11 @@ while True:
 
         # Record state
         if last_positions is not None:
-            print(x == sim_pos[pod_index][0], y == sim_pos[pod_index][1], file=sys.stderr, flush=True)
-            print('x : ' + str(x) + '  sim_x : ' + str(sim_pos[pod_index][0]) + '  y : ' + str(y) + '  sim_y : ' + str(sim_pos[pod_index][1]), file=sys.stderr, flush=True)
+            print(x == simulators[pod_index].pods[0].position[0], y == simulators[pod_index].pods[0].position[1], file=sys.stderr, flush=True)
+            print('x : ' + str(x) + '  sim_x : ' + str(simulators[pod_index].pods[0].position[0]) + '  y : ' + str(y) + '  sim_y : ' + str(simulators[pod_index].pods[0].position[1]), file=sys.stderr, flush=True)
 
         # Simulate move - simulator works in radians
-        sim_pos[pod_index], velocity, pod_angle, hit_checkpoint = simulators[pod_index].single_step(pod.position, pod.velocity, pod.angle, checkpoint_position, target_angle, thrust, command)
+        simulators[pod_index].single_step(target_angle, thrust, command)
 
         # Output the target position followed by the power (0 <= thrust <= 100)
         target_position = list(map(round, pod.position + 10000 * np.array((math.sin(target_angle), math.cos(target_angle)))))
@@ -124,7 +116,7 @@ while True:
         outputs.append(np.append(target_position, thrust))
 
     # Store current positions
-    last_positions = [pod.position for pod in pods]
+    last_positions = [deepcopy(pod.position) for pod in pods]
 
     print(*outputs[0], 'Beep beep')
     print(*outputs[1], 'Meep meep')

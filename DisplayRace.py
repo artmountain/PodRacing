@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from Courses import create_courses
 from NeuralNet import NeuralNetwork
-from TrainPodRacer import evaluate_racer
+from TrainPodRacer import PodRacerGeneticAlgorithm
 
 X_MAX = 16000
 Y_MAX = 9000
@@ -20,7 +20,7 @@ def generate_and_display_race(racer_config):
     racer_nn = NeuralNetwork(6, 2, [racer_nn_data['weights_0'], racer_nn_data['weights_1'], racer_nn_data['weights_2']],
                              [racer_nn_data['biases_0'], racer_nn_data['biases_1'], racer_nn_data['biases_2']])
     course = create_courses(1)[0]
-    score, next_checkpoint_idx, path, next_checkpoints, inputs = evaluate_racer(course, racer_nn, True)
+    score, next_checkpoint_idx, path, next_checkpoints, inputs = PodRacerGeneticAlgorithm.evaluate_racer(course, racer_nn, True)
     plot_pod_race(course.checkpoints, path, next_checkpoints, inputs)
 
 def plot_pod_race(checkpoints, path, next_checkpoints, inputs):
@@ -82,4 +82,4 @@ def plot_pod_paths(checkpoints, paths, pause_time):
     plt.close()
 
 if __name__ == '__main__':
-    generate_and_display_race(open('nn_data/racer_config.txt').readlines()[0])
+    generate_and_display_race(open('nn_data/racer_config_test.txt').readlines()[0])

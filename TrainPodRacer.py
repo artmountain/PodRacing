@@ -6,7 +6,7 @@ import numpy as np
 from Courses import create_courses
 from GeneticAlgorithm import GeneticAlgorithm
 from NeuralNet import NeuralNetwork
-from PodRaceSimulator import PodRaceSimulator
+from PodRaceSimulator import PodRaceSimulator, Pod
 from PodRacerFunctions import transform_race_data_to_nn_inputs, transform_nn_outputs_to_instructions, \
     transform_distance_to_input, get_angle, get_relative_angle_and_distance, \
     get_distance
@@ -44,7 +44,7 @@ class PodRacerGeneticAlgorithm(GeneticAlgorithm):
         GeneticAlgorithm.__init__(self, self.gene_length, population_size, True, mutation_rate, random_variation, True)
 
     def score_gene(self, gene):
-        racer = self.build_racer_from_gene(gene)
+        racer = self.build_racer_from_gene(self.nn_config, gene)
         return np.mean([self.evaluate_racer(course, racer, False)[0] for course in self.courses])
 
     def configure_next_generation(self):
@@ -52,67 +52,64 @@ class PodRacerGeneticAlgorithm(GeneticAlgorithm):
 
 
     @staticmethod
-    def evaluate_racer(course, racer, record_path):
+    def evaluate_racer(course, racer_nn, record_path):
         checkpoints = course.get_checkpoints()
-        position = deepcopy(course.get_start_position())
-        next_checkpoint_idx = 0
+        start_position = deepcopy(course.get_start_position())
         path = []
-        next_checkpoints = []
         inputs = []
+        next_checkpoints = []
         if record_path:
-            path.append(deepcopy(position))
-            next_checkpoints.append(next_checkpoint_idx)
+            path.append(deepcopy(start_position))
+            next_checkpoints.append(0)
             inputs.append([0, 0])
-        velocity = [0, 0]
-        angle = get_angle(checkpoints[0] - position)
-        simulator = PodRaceSimulator()
+        pod = Pod(start_position, np.array((0, 0)), get_angle(checkpoints[0] - start_position), 0)
+        simulator = PodRaceSimulator(checkpoints, [pod])
         for step in range(NUMBER_OF_DRIVE_STEPS):
-            velocity_angle, speed = get_relative_angle_and_distance(velocity, angle)
-            checkpoint_position = checkpoints[next_checkpoint_idx % len(checkpoints)]
-            checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - position, angle)
-            next_checkpoint_position = checkpoints[(next_checkpoint_idx + 1) % len(checkpoints)]
-            next_checkpoint_angle, next_checkpoint_distance = get_relative_angle_and_distance(next_checkpoint_position - position, angle)
+            velocity_angle, speed = get_relative_angle_and_distance(pod.velocity, pod.angle)
+            checkpoint_position = checkpoints[pod.next_checkpoint_id]
+            checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - pod.position, pod.angle)
+            next_checkpoint_position = checkpoints[(pod.next_checkpoint_id + 1) % len(checkpoints)]
+            next_checkpoint_angle, next_checkpoint_distance = get_relative_angle_and_distance(next_checkpoint_position - pod.position, pod.angle)
 
             nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance)
-            nn_outputs = racer.evaluate(nn_inputs)
+            nn_outputs = racer_nn.evaluate(nn_inputs)
             steer, thrust, command = transform_nn_outputs_to_instructions(nn_outputs)
 
             if record_path:
-                path.append(deepcopy(position))
-                next_checkpoints.append(next_checkpoint_idx)
+                path.append(deepcopy(pod.position))
+                next_checkpoints.append(pod.next_checkpoint_id)
                 inputs.append([round(math.degrees(steer)), int(thrust) if command is None else command])
                 print(inputs[-1][0], inputs[-1][1], nn_outputs[2])  # todo
-            position, velocity, angle, hit_checkpoint = simulator.single_step(position, velocity, angle, checkpoint_position, angle + steer, thrust, command)
-            if hit_checkpoint:
-                next_checkpoint_idx += 1
+            simulator.single_step(pod.angle + steer, thrust, command)
 
-        distance_to_next_checkpoint = get_distance(checkpoints[next_checkpoint_idx % len(checkpoints)] - position)
-        score = 100 * (next_checkpoint_idx + transform_distance_to_input(distance_to_next_checkpoint))
-        return score, next_checkpoint_idx, path, next_checkpoints, inputs
+        distance_to_next_checkpoint = get_distance(checkpoints[pod.next_checkpoint_id % len(checkpoints)] - pod.position)
+        score = 100 * (pod.next_checkpoint_id + transform_distance_to_input(distance_to_next_checkpoint))
+        return score, pod.next_checkpoint_id, path, next_checkpoints, inputs
 
     @staticmethod
-    def get_gene_from_racer(racer):
+    def get_gene_from_racer(nn_config, racer):
         gene = []
-        for layer in range(1, len(RACER_NN_CONFIG)):
-            for neuron in range(RACER_NN_CONFIG[layer]):
+        for layer in range(1, len(nn_config)):
+            for neuron in range(nn_config[layer]):
                 gene += racer.neurons[layer - 1][neuron].weights.tolist()
-            for neuron in range(RACER_NN_CONFIG[layer]):
+            for neuron in range(nn_config[layer]):
                 gene.append(racer.neurons[layer - 1][neuron].bias)
         return gene
 
-    def build_racer_from_gene(self, gene):
+    @staticmethod
+    def build_racer_from_gene(nn_config, gene):
         weights = []
         biases = []
         gene_index = 0
-        for layer in range(1, len(self.nn_config)):
+        for layer in range(1, len(nn_config)):
             weights_this_layer = []
-            for neuron in range(self.nn_config[layer]):
-                weights_this_layer.append(np.array(gene[gene_index:gene_index + self.nn_config[layer - 1]]))
-                gene_index += self.nn_config[layer - 1]
+            for neuron in range(nn_config[layer]):
+                weights_this_layer.append(np.array(gene[gene_index:gene_index + nn_config[layer - 1]]))
+                gene_index += nn_config[layer - 1]
             weights.append(weights_this_layer)
-            biases.append(deepcopy(gene[gene_index:gene_index + self.nn_config[layer]]))
-            gene_index += self.nn_config[layer]
-        racer = NeuralNetwork(self.nn_config[0], self.nn_config[-1], weights, biases)
+            biases.append(deepcopy(gene[gene_index:gene_index + nn_config[layer]]))
+            gene_index += nn_config[layer]
+        racer = NeuralNetwork(nn_config[0], nn_config[-1], weights, biases)
         return racer
 
 def train_pod_racer(output_file, racers_seed_file):
@@ -123,7 +120,7 @@ def train_pod_racer(output_file, racers_seed_file):
         with open(racers_seed_file, 'r') as f:
             for line in f.readlines():
                 racer = NeuralNetwork.create_from_json(line.rstrip(), RACER_NN_CONFIG)
-                gene = racer_training_ga.get_gene_from_racer(racer)
+                gene = racer_training_ga.get_gene_from_racer(RACER_NN_CONFIG, racer)
                 racer_training_ga.add_gene_to_pool(gene)
 
     # Add in random racers to complete the population
@@ -136,5 +133,5 @@ def train_pod_racer(output_file, racers_seed_file):
     population = racer_training_ga.get_population()
     open(output_file, "w").close()
     for gene in population:
-        racer = racer_training_ga.build_racer_from_gene(gene[0])
+        racer = PodRacerGeneticAlgorithm.build_racer_from_gene(RACER_NN_CONFIG, gene[0])
         racer.pickle_neuron_config(output_file)
