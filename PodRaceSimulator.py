@@ -46,10 +46,10 @@ class PodRaceSimulator:
                 pod.boost_used = True
 
             # Calculate new angle
-            new_angle = self.update_angle(pod.angle, input_angle)
+            pod.angle = self.update_angle(pod.angle, input_angle)
 
             # Calculate thrust and update speed
-            thrust_v = thrust * np.array((math.sin(new_angle), math.cos(new_angle)))
+            thrust_v = thrust * np.array((math.sin(pod.angle), math.cos(pod.angle)))
             new_velocity = pod.velocity + thrust_v
 
             # Move
