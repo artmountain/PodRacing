@@ -23,7 +23,8 @@ class GeneticAlgorithm:
         pass
 
     def add_gene_to_pool(self, gene):
-        self.population.append(gene)
+        score = self.score_gene(gene)
+        self.population.append([gene, score])
 
     def complete_population_with_random_genes(self):
         for _i in range(self.population_size - len(self.population)):
