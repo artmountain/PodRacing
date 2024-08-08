@@ -26,7 +26,6 @@ POPULATION_SIZE = 5 if TEST else 50
 NUMBER_OF_DRIVE_STEPS = 10 if TEST else 200
 NUMBER_OF_TRAINING_COURSES = 10
 NUMBER_OF_RACER_GENERATIONS = 10 if TEST else 500
-NUMBER_OF_RACER_MUTATIONS = 10
 NN_MUTATION_RATE = 0.05
 RANDOM_VARIATION = 0.2
 
@@ -81,8 +80,8 @@ class PodRacerGeneticAlgorithm(GeneticAlgorithm):
                 inputs.append([round(math.degrees(steer)), int(thrust) if command is None else command])
             simulator.single_step(pod.angle + steer, thrust, command)
 
-        distance_to_next_checkpoint = get_distance(checkpoints[pod.next_checkpoint_id % len(checkpoints)] - pod.position)
-        score = 100 * (pod.next_checkpoint_id + transform_distance_to_input(distance_to_next_checkpoint))
+        distance_to_next_checkpoint = get_distance(checkpoints[pod.next_checkpoint_id] - pod.position)
+        score = 100 * (pod.checkpoints_passed + transform_distance_to_input(distance_to_next_checkpoint))
         return score, pod.next_checkpoint_id, path, next_checkpoints, inputs
 
     @staticmethod

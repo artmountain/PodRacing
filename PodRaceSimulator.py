@@ -14,6 +14,7 @@ class Pod:
         self.next_checkpoint_id = next_checkpoint_id
 
         self.boost_used = False
+        self.checkpoints_passed = 0
 
 # Angles all in radians
 class PodRaceSimulator:
@@ -62,6 +63,7 @@ class PodRaceSimulator:
             touched_checkpoint = np.sum(np.square(pod.position - self.checkpoints[pod.next_checkpoint_id])) < 360000
             if touched_checkpoint:
                 pod.next_checkpoint_id = (pod.next_checkpoint_id + 1) % len(self.checkpoints)
+                pod.checkpoints_passed += 1
 
         # TODO - handle collisions
 
