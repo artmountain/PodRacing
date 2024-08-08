@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 from Courses import create_courses
 from NeuralNet import NeuralNetwork
+from TrainPodBlocker import PodBlockerGeneticAlgorithm
 from TrainPodRacer import PodRacerGeneticAlgorithm, RACER_NN_CONFIG
 
 X_MAX = 16000
@@ -26,14 +27,14 @@ def generate_and_display_race(racer_config, blocker_config):
         blocker_nn = NeuralNetwork(RACER_NN_CONFIG[0], RACER_NN_CONFIG[-1],
                                  [blocker_nn_data['weights_0'], blocker_nn_data['weights_1'], blocker_nn_data['weights_2']],
                                  [blocker_nn_data['biases_0'], blocker_nn_data['biases_1'], blocker_nn_data['biases_2']])
-        paths = PodRacerGeneticAlgorithm.evaluate_racer(course, racer_nn, blocker_nn)
-
+        score, racer_next_checkpoint_id, paths, next_checkpoints, inputs = PodBlockerGeneticAlgorithm.evaluate_racer_and_blocker(course, racer_nn, blocker_nn, True)
+        plot_pod_race(course.checkpoints, paths, None, None)
     else:
         score, next_checkpoint_idx, path, next_checkpoints, inputs = PodRacerGeneticAlgorithm.evaluate_racer(course, racer_nn, True)
         plot_pod_race(course.checkpoints, [path], next_checkpoints, inputs)
 
 def plot_pod_race(checkpoints, paths, next_checkpoints, inputs):
-    print(len(paths[0]), len(inputs))  # todo
+    # print(len(paths[0]), len(inputs))  # todo
     fig = plt.figure(figsize=(5, 4))
     ax = plt.axes(xlim=(0, X_MAX), ylim=(0, Y_MAX))
     ax.set_aspect('equal')
@@ -47,7 +48,7 @@ def plot_pod_race(checkpoints, paths, next_checkpoints, inputs):
     number_of_pods = len(paths)
     pod_icons = []
     for pod_id in range(number_of_pods):
-        pod = plt.Circle((paths[pod_id][0][0], paths[pod_id][0][1]), POD_SIZE, color='b')
+        pod = plt.Circle((paths[pod_id][0][0], paths[pod_id][0][1]), POD_SIZE, color='b' if pod_id == 0 else 'g')
         pod_icons.append(pod)
 
     output_template = 'round %i  steer %i  thrust %s  next checkpoint %i'
@@ -58,16 +59,18 @@ def plot_pod_race(checkpoints, paths, next_checkpoints, inputs):
             checkpoint_icons[j].center = (checkpoints[j][0], checkpoints[j][1])
             ax.add_patch(checkpoint_icons[j])
         for _pod_id in range(number_of_pods):
-            pod_icons[_pod_id].center = (paths[_pod_id][0][0], paths[_pod_id][0][1])
+            pod = pod_icons[_pod_id]
+            pod.center = (paths[_pod_id][0][0], paths[_pod_id][0][1])
             ax.add_patch(pod)
-        return checkpoint_icons[0], checkpoint_icons[1], checkpoint_icons[2], *pod_icons, output_text
+        return checkpoint_icons[0], checkpoint_icons[1], checkpoint_icons[2], pod_icons[0], pod_icons[1], output_text
 
     def animate(i):
         for _pod_id in range(number_of_pods):
             pod_icons[_pod_id].center = (paths[_pod_id][i][0], paths[_pod_id][i][1])
-        angle, thrust = inputs[min(i, len(inputs) - 1)]
-        output_text.set_text(output_template % (i, angle, str(thrust), next_checkpoints[i]))
-        return checkpoint_icons[0], checkpoint_icons[1], checkpoint_icons[2], pod, output_text
+        if inputs is not None:
+            angle, thrust = inputs[min(i, len(inputs) - 1)]
+            output_text.set_text(output_template % (i, angle, str(thrust), next_checkpoints[i]))
+        return checkpoint_icons[0], checkpoint_icons[1], checkpoint_icons[2], pod_icons[0], pod_icons[1], output_text
 
     _ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(paths[0]), interval=TIME_PER_FRAME * 1000, blit=True)
     plt.show()
@@ -97,4 +100,6 @@ def plot_pod_paths(checkpoints, paths, pause_time):
     plt.close()
 
 if __name__ == '__main__':
-    generate_and_display_race(open('nn_data/live_racer_nn_config.txt').readlines()[0], None)
+    #generate_and_display_race(open('nn_data/live_racer_nn_config.txt').readlines()[0], None)
+    generate_and_display_race(open('nn_data/live_racer_nn_config.txt').readlines()[0],
+                              open('nn_data/blocker_config.txt').readlines()[0])

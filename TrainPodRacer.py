@@ -40,7 +40,7 @@ class PodRacerGeneticAlgorithm(GeneticAlgorithm):
         for layer in range(1, len(nn_config)):
             self.gene_length += (nn_config[layer - 1] + 1) * nn_config[layer]
 
-        GeneticAlgorithm.__init__(self, self.gene_length, population_size, True, mutation_rate, random_variation, True)
+        GeneticAlgorithm.__init__(self, self.gene_length, population_size, True, mutation_rate, random_variation, True, True)
 
     def score_gene(self, gene):
         racer = self.build_racer_from_gene(self.nn_config, gene)
@@ -48,7 +48,6 @@ class PodRacerGeneticAlgorithm(GeneticAlgorithm):
 
     def configure_next_generation(self):
         self.courses = create_courses(NUMBER_OF_TRAINING_COURSES)
-
 
     @staticmethod
     def evaluate_racer(course, racer_nn, record_path):
@@ -133,3 +132,6 @@ def train_pod_racer(output_file, racers_seed_file):
     for gene in population:
         racer = PodRacerGeneticAlgorithm.build_racer_from_gene(RACER_NN_CONFIG, gene[0])
         racer.pickle_neuron_config(output_file)
+
+if __name__ == '__main__':
+    train_pod_racer('nn_data/racer_config2.txt', 'nn_data/racer_config.txt')
