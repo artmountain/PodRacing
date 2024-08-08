@@ -29,4 +29,7 @@ if __name__ == '__main__':
                     if '% INSERT RACER NN CONFIG %' in line:
                         with open('../nn_data/live_racer_nn_config.txt', 'r') as nn_config:
                             line = line.replace('% INSERT RACER NN CONFIG %', nn_config.read())
+                    if '% INSERT BLOCKER NN CONFIG %' in line:
+                        with open('../nn_data/live_blocker_nn_config.txt', 'r') as nn_config:
+                            line = line.replace('% INSERT BLOCKER NN CONFIG %', nn_config.read())
                     racer.write(line)
