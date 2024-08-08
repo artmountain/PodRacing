@@ -38,12 +38,17 @@ class GeneticAlgorithm:
             # Do any setup for the new generation
             self.configure_next_generation()
 
-            new_genes = []
+            # Get stdev of chromosomes - to provide a scale for random variation
+            chromosome_range = 0
+            for gene, score in self.population:
+                chromosome_range += np.std(gene)
+            chromosome_range /= self.population_size
 
             # Create and evaluate the next generation - first create new genes by mutation and replace parent if better
+            new_genes = []
             if self.use_mutations:
-                for gene_idx in range(self.population_size):
-                    new_gene = [c + (random.random() - 0.5) * self.mutation_rate for c in self.population[gene_idx][0]]
+                for gene, score in self.population:
+                    new_gene = [c + (random.random() - 0.5) * chromosome_range * self.random_variation for c in gene]
                     new_genes.append(new_gene)
 
             # Now breed genes
@@ -57,20 +62,14 @@ class GeneticAlgorithm:
                 child_gene_scale = [0] * self.gene_length
                 child_gene_splice = [0] * self.gene_length
                 splice_point = random.randint(0, self.gene_length)
-                scale_factor = 1.2 * random.random() - 0.1
+                splice_factor = 1.2 * random.random() - 0.1
                 for j in range(self.gene_length):
-                    random_variation = (1 if random.random() < self.mutation_rate else 0) * 2 * self.random_variation * random.random() * (random.random() - 0.5)
+                    random_variation = (1 if random.random() < self.mutation_rate else 0) * 2 * self.random_variation * chromosome_range * random.random() * (random.random() - 0.5)
                     child_gene_interleave[j] = (parent1[j] if random.random() > 0.5 else parent2[j]) + random_variation
-                    random_variation_for_scale = (
-                                                     1 if random.random() < self.mutation_rate else 0) * 2 * self.random_variation * random.random() * (
-                                                             random.random() - 0.5)
-                    child_gene_scale[j] = (parent1[j] * scale_factor + parent2[j] * (
-                            1 - scale_factor)) + random_variation_for_scale
-                    random_variation_for_splice = (
-                                                      1 if random.random() < self.mutation_rate else 0) * 2 * self.random_variation * random.random() * (
-                                                              random.random() - 0.5)
-                    child_gene_splice[j] = (parent1[j] if j < splice_point else parent2[
-                        j]) + random_variation_for_splice
+                    random_variation_for_scale = (1 if random.random() < self.mutation_rate else 0) * 2 * self.random_variation * chromosome_range * random.random() * (random.random() - 0.5)
+                    child_gene_scale[j] = (parent1[j] * splice_factor + parent2[j] * (1 - splice_factor)) + random_variation_for_scale
+                    random_variation_for_splice = (1 if random.random() < self.mutation_rate else 0) * 2 * self.random_variation * chromosome_range * random.random() * (random.random() - 0.5)
+                    child_gene_splice[j] = (parent1[j] if j < splice_point else parent2[j]) + random_variation_for_splice
                 new_genes.append(child_gene_interleave)
                 new_genes.append(child_gene_scale)
                 new_genes.append(child_gene_splice)

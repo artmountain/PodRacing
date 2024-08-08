@@ -26,9 +26,6 @@ def get_relative_angle_and_distance(vector, reference_angle):
 def transform_distance_to_input(distance):
     return 1 / (1 + distance / 1000)
 
-def transform_output_to_distance(output):
-    return (1 / output - 1) * 1000
-
 def transform_speed_to_input(_speed):
     return 1 / (1 + _speed / 100)
 
