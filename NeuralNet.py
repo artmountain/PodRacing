@@ -73,7 +73,7 @@ class NeuralNetwork:
         for i in range(len(nn_shape) - 1):
             weights.append(np.array(nn_data[f'weights_{i}']))
             biases.append(np.array(nn_data[f'biases_{i}']))
-        return NeuralNetwork(6, 2, weights, biases)
+        return NeuralNetwork(nn_shape[0], nn_shape[-1], weights, biases)
 
     # Fitting below this line
 
