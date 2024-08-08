@@ -1,5 +1,6 @@
 import math
 import sys
+import itertools
 
 # INSERT NEURAL NETWORK CODE
 
@@ -62,7 +63,7 @@ while True:
     simulator = PodRaceSimulator(checkpoints, pods)
 
     outputs = []
-
+    sim_inputs = []
     for pod_index in range(2):
         pod = pods[pod_index]
 
@@ -92,12 +93,12 @@ while True:
                 steer = 0
                 thrust = 100
                 initialized = True
-            sim_inputs = [[steer, thrust, command]]
+            sim_inputs.append([steer, thrust, command])
         else:
             # Blocker - inputs are [velocity_angle, speed, velocity_angle, speed, racer_angle, racer_distance, checkpoint_angle, checkpoint_distance]
             opponent = opponent_pods[1 if len(opponent_next_checkpoints[1]) > len(opponent_next_checkpoints[0]) else 0]
             opponent_angle, opponent_distance = get_relative_angle_and_distance(opponent.position - pod.position, pod.angle)
-            checkpoint_position = checkpoints[opponent.next_checkpoint]
+            checkpoint_position = checkpoints[opponent.next_checkpoint_id]
             checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - pod.position, pod.angle)
             nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, opponent_angle, opponent_distance, checkpoint_angle, checkpoint_distance)
             nn_outputs = blocker.evaluate(nn_inputs)
@@ -119,7 +120,7 @@ while True:
     #    print('x : ' + str(x) + '  sim_x : ' + str(simulators[pod_index].pods[0].position[0]) + '  y : ' + str(y) + '  sim_y : ' + str(simulators[pod_index].pods[0].position[1]), file=sys.stderr, flush=True)
 
     # Simulate move - simulator works in radians
-    simulator.single_step(inputs)
+    simulator.single_step(sim_inputs)
 
     print(*outputs[0], 'Beep beep')
     print(*outputs[1], 'Meep meep')

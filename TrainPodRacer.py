@@ -134,4 +134,5 @@ def train_pod_racer(output_file, racers_seed_file):
         racer.pickle_neuron_config(output_file)
 
 if __name__ == '__main__':
-    train_pod_racer('nn_data/racer_config2.txt', 'nn_data/racer_config.txt')
+    #train_pod_racer('nn_data/racer_config2.txt', 'nn_data/racer_config.txt')
+    train_pod_racer('nn_data/racer_config3.txt', 'nn_data/racer_config2.txt')
