@@ -78,7 +78,7 @@ class PodRacerGeneticAlgorithm(GeneticAlgorithm):
                 path.append(deepcopy(pod.position))
                 next_checkpoints.append(pod.next_checkpoint_id)
                 inputs.append([round(math.degrees(steer)), int(thrust) if command is None else command])
-            simulator.single_step(pod.angle + steer, thrust, command)
+            simulator.single_step([[pod.angle + steer, thrust, command]])
 
         distance_to_next_checkpoint = get_distance(checkpoints[pod.next_checkpoint_id] - pod.position)
         score = 100 * (pod.checkpoints_passed + transform_distance_to_input(distance_to_next_checkpoint))

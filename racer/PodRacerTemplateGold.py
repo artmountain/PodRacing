@@ -106,7 +106,7 @@ while True:
             print('x : ' + str(x) + '  sim_x : ' + str(simulators[pod_index].pods[0].position[0]) + '  y : ' + str(y) + '  sim_y : ' + str(simulators[pod_index].pods[0].position[1]), file=sys.stderr, flush=True)
 
         # Simulate move - simulator works in radians
-        simulators[pod_index].single_step(target_angle, thrust, command)
+        simulators[pod_index].single_step([[target_angle, thrust, command]])
 
         # Output the target position followed by the power (0 <= thrust <= 100)
         target_position = list(map(round, pod.position + 10000 * np.array((math.sin(target_angle), math.cos(target_angle)))))

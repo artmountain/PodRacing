@@ -1,10 +1,10 @@
+import itertools
 import math
 
 import numpy as np
 
-FULL_CIRCLE = math.radians(360)
-HALF_CIRCLE = math.radians(180)
-MAX_STEER_PER_TURN = math.radians(18)
+from PodRacerFunctions import get_distance, get_angle, update_angle
+
 
 class Pod:
     def __init__(self, position, velocity, angle, next_checkpoint_id):
@@ -22,24 +22,12 @@ class PodRaceSimulator:
         self.checkpoints = checkpoints
         self.pods = pods
 
-    @staticmethod
-    def update_angle(current_angle, target_angle):
-        clockwise = target_angle - current_angle + (FULL_CIRCLE if target_angle < current_angle else 0)
-        anticlockwise = current_angle - target_angle + (FULL_CIRCLE if target_angle > current_angle else 0)
-        if anticlockwise < clockwise:
-            new_angle = current_angle - min(MAX_STEER_PER_TURN, anticlockwise)
-            if new_angle < -HALF_CIRCLE:
-                new_angle += FULL_CIRCLE
-        else:
-            new_angle = current_angle + min(MAX_STEER_PER_TURN, clockwise)
-            if new_angle > HALF_CIRCLE:
-                new_angle -= FULL_CIRCLE
-        return new_angle
-
-    def single_step(self, input_angle, thrust, command):
-        # Todo - take multiple inputs
+    # inputs are a vector of [input_angle, thrust, command] for each pod
+    def single_step(self, inputs):
+        # First move the pods
         for pod_id in range(len(self.pods)):
             pod = self.pods[pod_id]
+            input_angle, thrust, command = inputs[pod_id]
 
             # Process BOOST
             if command == 'BOOST' and not not pod.boost_used:
@@ -47,25 +35,36 @@ class PodRaceSimulator:
                 pod.boost_used = True
 
             # Calculate new angle
-            pod.angle = self.update_angle(pod.angle, input_angle)
+            pod.angle = update_angle(pod.angle, input_angle)
 
             # Calculate thrust and update speed
             thrust_v = thrust * np.array((math.sin(pod.angle), math.cos(pod.angle)))
-            new_velocity = pod.velocity + thrust_v
+            pod.velocity = pod.velocity + thrust_v
 
             # Move
-            pod.position = np.round(pod.position + new_velocity)
+            pod.position = np.round(pod.position + pod.velocity)
 
+        # Now check for collisions
+        for pod1, pod2 in itertools.combinations(self.pods, 2):
+            separation = pod1.position - pod2.position
+            if get_distance(separation) < 1000:
+                # Collision occurred
+                angle_of_separation = get_angle(separation)
+                line_of_separation = np.array((math.sin(angle_of_separation), math.cos(angle_of_separation)))
+                relative_speed_along_line = np.dot(pod1.velocity, line_of_separation) - np.dot(pod2.velocity, line_of_separation)
+                pod1.velocity = pod1.velocity - line_of_separation * relative_speed_along_line
+                pod2.velocity = pod2.velocity + line_of_separation * relative_speed_along_line
+
+        # Finally apply drag and see whether any checkpoints hit
+        for pod in self.pods:
             # Apply Drag
-            pod.velocity = np.trunc(0.85 * new_velocity)
+            pod.velocity = np.trunc(0.85 * pod.velocity)
 
             # See whether we hit a checkpoint
             touched_checkpoint = np.sum(np.square(pod.position - self.checkpoints[pod.next_checkpoint_id])) < 360000
             if touched_checkpoint:
                 pod.next_checkpoint_id = (pod.next_checkpoint_id + 1) % len(self.checkpoints)
                 pod.checkpoints_passed += 1
-
-        # TODO - handle collisions
 
     def get_pod(self, index):
         return self.pods[index]

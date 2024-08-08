@@ -50,7 +50,7 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
         inputs = []
         if record_path:
             path.append(deepcopy(start_position))
-            inputs.append([0, 0])
+            inputs.append([0, 0, 0, 0])
 
         simulator = PodRaceSimulator(checkpoints, [racer, blocker])
         for step in range(NUMBER_OF_DRIVE_STEPS):
@@ -74,8 +74,10 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
 
             if record_path:
                 path.append(deepcopy(racer.position))
-                inputs.append([round(math.degrees(racer_steer)), int(racer_thrust) if racer_command is None else racer_command])
-            position, velocity, angle, hit_checkpoint = simulator.single_step(angle + racer_steer, racer_thrust, racer_command)  # todo
+                inputs.append([[round(math.degrees(racer_steer)), int(racer_thrust) if racer_command is None else racer_command],
+                               [round(math.degrees(blocker_steer)), int(blocker_thrust) if blocker_command is None else blocker_command]])
+            simulator.single_step([[racer.angle + racer_steer, racer_thrust, racer_command],
+                                   [blocker.angle + blocker_steer, blocker_thrust, blocker_command]])
 
         # Score is how far the opponent racer gets - we want to minimize this so maximize the negative
         distance_to_next_checkpoint = get_distance(checkpoints[racer.next_checkpoint_id % len(checkpoints)] - racer.position)

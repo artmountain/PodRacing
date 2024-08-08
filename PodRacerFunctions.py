@@ -1,7 +1,10 @@
-import numpy as np
 import math
 
-from PodRaceSimulator import MAX_STEER_PER_TURN
+import numpy as np
+
+FULL_CIRCLE = math.radians(360)
+HALF_CIRCLE = math.radians(180)
+MAX_STEER_PER_TURN = math.radians(18)
 
 
 # All angles in radians
@@ -21,6 +24,19 @@ def get_relative_angle_and_distance(vector, reference_angle):
         angle += 2 * math.pi
     distance = get_distance(vector)
     return np.array((angle, distance))
+
+def update_angle(current_angle, target_angle):
+    clockwise = target_angle - current_angle + (FULL_CIRCLE if target_angle < current_angle else 0)
+    anticlockwise = current_angle - target_angle + (FULL_CIRCLE if target_angle > current_angle else 0)
+    if anticlockwise < clockwise:
+        new_angle = current_angle - min(MAX_STEER_PER_TURN, anticlockwise)
+        if new_angle < -HALF_CIRCLE:
+            new_angle += FULL_CIRCLE
+    else:
+        new_angle = current_angle + min(MAX_STEER_PER_TURN, clockwise)
+        if new_angle > HALF_CIRCLE:
+            new_angle -= FULL_CIRCLE
+    return new_angle
 
 # Transform distance to a number between 0 and 1
 def transform_distance_to_input(distance):
