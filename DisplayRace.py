@@ -12,7 +12,7 @@ from TrainPodRacer import PodRacerGeneticAlgorithm, RACER_NN_CONFIG
 
 X_MAX = 16000
 Y_MAX = 9000
-POD_SIZE = 500
+POD_SIZE = 400
 CHECKPOINT_SIZE = 300
 TIME_PER_FRAME = 0.05
 
@@ -34,7 +34,6 @@ def generate_and_display_race(racer_config, blocker_config):
         plot_pod_race(course.checkpoints, [path], next_checkpoints, inputs)
 
 def plot_pod_race(checkpoints, paths, next_checkpoints, inputs):
-    # print(len(paths[0]), len(inputs))  # todo
     fig = plt.figure(figsize=(5, 4))
     ax = plt.axes(xlim=(0, X_MAX), ylim=(0, Y_MAX))
     ax.set_aspect('equal')
@@ -59,10 +58,10 @@ def plot_pod_race(checkpoints, paths, next_checkpoints, inputs):
             checkpoint_icons[j].center = (checkpoints[j][0], checkpoints[j][1])
             ax.add_patch(checkpoint_icons[j])
         for _pod_id in range(number_of_pods):
-            pod = pod_icons[_pod_id]
-            pod.center = (paths[_pod_id][0][0], paths[_pod_id][0][1])
-            ax.add_patch(pod)
-        return checkpoint_icons[0], checkpoint_icons[1], checkpoint_icons[2], pod_icons[0], pod_icons[1], output_text
+            _pod = pod_icons[_pod_id]
+            _pod.center = (paths[_pod_id][0][0], paths[_pod_id][0][1])
+            ax.add_patch(_pod)
+        return *checkpoint_icons, *pod_icons, output_text
 
     def animate(i):
         for _pod_id in range(number_of_pods):
@@ -70,7 +69,7 @@ def plot_pod_race(checkpoints, paths, next_checkpoints, inputs):
         if inputs is not None:
             angle, thrust = inputs[min(i, len(inputs) - 1)]
             output_text.set_text(output_template % (i, angle, str(thrust), next_checkpoints[i]))
-        return checkpoint_icons[0], checkpoint_icons[1], checkpoint_icons[2], pod_icons[0], pod_icons[1], output_text
+        return *checkpoint_icons, *pod_icons, output_text
 
     _ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(paths[0]), interval=TIME_PER_FRAME * 1000, blit=True)
     plt.show()
