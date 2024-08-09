@@ -10,9 +10,10 @@ from PodRaceSimulator import PodRaceSimulator, Pod
 from PodRacerFunctions import transform_race_data_to_nn_inputs, transform_nn_outputs_to_instructions, \
     transform_distance_to_input, get_angle, get_relative_angle_and_distance, \
     get_distance
-from TrainPodRacer import PodRacerGeneticAlgorithm, RACER_NN_CONFIG, NUMBER_OF_TRAINING_COURSES, NUMBER_OF_DRIVE_STEPS, \
+from TrainPodRacer import PodRacerGeneticAlgorithm, RACER_NN_CONFIG, NUMBER_OF_DRIVE_STEPS, \
     POPULATION_SIZE, NN_MUTATION_RATE, RANDOM_VARIATION, NUMBER_OF_RACER_GENERATIONS
 
+NUMBER_OF_BLOCKER_TRAINING_COURSES = 5
 
 class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
     def __init__(self, racer, blocker_nn_config, population_size, mutation_rate, random_variation):
@@ -32,7 +33,7 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
         return np.mean([self.evaluate_racer_and_blocker(course, self.racer, blocker, False)[0] for course in self.courses])
 
     def configure_next_generation(self):
-        self.courses = create_courses(NUMBER_OF_TRAINING_COURSES)
+        self.courses = create_courses(NUMBER_OF_BLOCKER_TRAINING_COURSES)
 
     @staticmethod
     def evaluate_racer_and_blocker(course, racer_nn, blocker_nn, record_path):
@@ -84,9 +85,9 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
                                    [blocker.angle + blocker_steer, blocker_thrust, blocker_command]])
 
         # Score is how far the opponent racer gets - we want to minimize this
-        distance_to_next_checkpoint = get_distance(checkpoints[racer.next_checkpoint_id % len(checkpoints)] - racer.position)
+        distance_to_next_checkpoint = get_distance(checkpoints[racer.next_checkpoint_id] - racer.position)
         score = 100 * (racer.checkpoints_passed + transform_distance_to_input(distance_to_next_checkpoint))
-        return score, racer.next_checkpoint_id, paths, next_checkpoints, inputs
+        return score, paths, next_checkpoints, inputs
 
 def train_pod_blocker(racer_file, output_file, blockers_seed_file):
     # Get racer to train against
@@ -117,4 +118,4 @@ def train_pod_blocker(racer_file, output_file, blockers_seed_file):
         blocker.pickle_neuron_config(output_file)
 
 if __name__ == '__main__':
-    train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config.txt', None)
+    train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config2.txt', 'nn_data/blocker_config.txt')

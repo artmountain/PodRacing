@@ -27,10 +27,10 @@ def generate_and_display_race(racer_config, blocker_config):
         blocker_nn = NeuralNetwork(RACER_NN_CONFIG[0], RACER_NN_CONFIG[-1],
                                  [blocker_nn_data['weights_0'], blocker_nn_data['weights_1'], blocker_nn_data['weights_2']],
                                  [blocker_nn_data['biases_0'], blocker_nn_data['biases_1'], blocker_nn_data['biases_2']])
-        score, racer_next_checkpoint_id, paths, next_checkpoints, inputs = PodBlockerGeneticAlgorithm.evaluate_racer_and_blocker(course, racer_nn, blocker_nn, True)
+        score, paths, next_checkpoints, inputs = PodBlockerGeneticAlgorithm.evaluate_racer_and_blocker(course, racer_nn, blocker_nn, True)
         plot_pod_race(course.checkpoints, paths, None, None)
     else:
-        score, next_checkpoint_idx, path, next_checkpoints, inputs = PodRacerGeneticAlgorithm.evaluate_racer(course, racer_nn, True)
+        score, path, next_checkpoints, inputs = PodRacerGeneticAlgorithm.evaluate_racer(course, racer_nn, True)
         plot_pod_race(course.checkpoints, [path], next_checkpoints, inputs)
 
 def plot_pod_race(checkpoints, paths, next_checkpoints, inputs):
@@ -101,4 +101,4 @@ def plot_pod_paths(checkpoints, paths, pause_time):
 if __name__ == '__main__':
     #generate_and_display_race(open('nn_data/live_racer_nn_config.txt').readlines()[0], None)
     generate_and_display_race(open('nn_data/live_racer_nn_config.txt').readlines()[0],
-                              open('nn_data/blocker_config.txt').readlines()[0])
+                              open('nn_data/live_blocker_nn_config.txt').readlines()[0])
