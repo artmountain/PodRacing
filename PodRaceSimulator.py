@@ -46,14 +46,18 @@ class PodRaceSimulator:
 
         # Now check for collisions
         for pod1, pod2 in itertools.combinations(self.pods, 2):
-            separation = pod1.position - pod2.position
+            separation = pod2.position - pod1.position
             if get_distance(separation) < 1000:
                 # Collision occurred
                 angle_of_separation = get_angle(separation)
                 line_of_separation = np.array((math.sin(angle_of_separation), math.cos(angle_of_separation)))
                 relative_speed_along_line = np.dot(pod1.velocity, line_of_separation) - np.dot(pod2.velocity, line_of_separation)
+                # Minimum impulse is 120
+                relative_speed_along_line = max(120, relative_speed_along_line)
                 pod1.velocity = pod1.velocity - line_of_separation * relative_speed_along_line
                 pod2.velocity = pod2.velocity + line_of_separation * relative_speed_along_line
+                for pod in [pod1, pod2]:
+                    pod.position = pod.position + pod.velocity
 
         # Finally apply drag and see whether any checkpoints hit
         for pod in self.pods:
