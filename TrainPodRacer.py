@@ -40,7 +40,7 @@ class PodRacerGeneticAlgorithm(GeneticAlgorithm):
         for layer in range(1, len(nn_config)):
             self.gene_length += (nn_config[layer - 1] + 1) * nn_config[layer]
 
-        GeneticAlgorithm.__init__(self, self.gene_length, population_size, True, mutation_rate, random_variation, True, True)
+        GeneticAlgorithm.__init__(self, self.gene_length, population_size, True, mutation_rate, random_variation, True)
 
     def score_gene(self, gene):
         racer = self.build_racer_from_gene(self.nn_config, gene)

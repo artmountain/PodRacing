@@ -26,7 +26,7 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
         for layer in range(1, len(blocker_nn_config)):
             self.gene_length += (blocker_nn_config[layer - 1] + 1) * blocker_nn_config[layer]
 
-        GeneticAlgorithm.__init__(self, self.gene_length, population_size, True, mutation_rate, random_variation, True, True)
+        GeneticAlgorithm.__init__(self, self.gene_length, population_size, True, mutation_rate, random_variation, True)
 
     def score_gene(self, gene):
         blocker = PodRacerGeneticAlgorithm.build_racer_from_gene(self.blocker_nn_config, gene)

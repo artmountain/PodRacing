@@ -4,14 +4,13 @@ import abc
 import numpy as np
 
 class GeneticAlgorithm:
-    def __init__(self, gene_length, population_size, use_mutations, mutation_rate, random_variation, keep_best_gene, maximize_score):
+    def __init__(self, gene_length, population_size, use_mutations, mutation_rate, random_variation, keep_best_gene):
         self.gene_length = gene_length
         self.population_size = population_size
         self.use_mutations = use_mutations
         self.mutation_rate = mutation_rate
         self.random_variation = random_variation
         self.keep_best_gene = keep_best_gene
-        self.maximize_score = maximize_score
 
         self.population = []
         self.configure_next_generation()
@@ -89,7 +88,7 @@ class GeneticAlgorithm:
                 new_population.append([best_gene[0], emwa_score])
 
             # Filter and select best of population
-            self.population = sorted(new_population, key=lambda x: x[1], reverse=self.maximize_score)[:self.population_size]
+            self.population = sorted(new_population, key=lambda x: x[1], reverse=True)[:self.population_size]
             print(f'Generation {generation}. Best score: {self.population[0][1]}')
             print(f'All scores: {np.around(np.array([g[1] for g in self.population]), 2).tolist()}')
 
