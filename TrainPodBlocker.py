@@ -26,11 +26,11 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
         for layer in range(1, len(blocker_nn_config)):
             self.gene_length += (blocker_nn_config[layer - 1] + 1) * blocker_nn_config[layer]
 
-        GeneticAlgorithm.__init__(self, self.gene_length, population_size, True, mutation_rate, random_variation, True, False)
+        GeneticAlgorithm.__init__(self, self.gene_length, population_size, True, mutation_rate, random_variation, True, True)
 
     def score_gene(self, gene):
         blocker = PodRacerGeneticAlgorithm.build_racer_from_gene(self.blocker_nn_config, gene)
-        return np.mean([self.evaluate_racer_and_blocker(course, self.racer, blocker, False)[0] for course in self.courses])
+        return np.mean([self.evaluate_racer_and_blocker(course, self.racer, None, False)[0] - self.evaluate_racer_and_blocker(course, self.racer, blocker, False)[0] for course in self.courses])
 
     def configure_next_generation(self):
         self.courses = create_courses(NUMBER_OF_BLOCKER_TRAINING_COURSES)
@@ -43,7 +43,10 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
         start_position = course.get_start_position()
         angle = get_angle(checkpoints[0] - start_position)
         racer = Pod(deepcopy(start_position), np.array((0, 0)), angle, 0)
-        blocker = Pod(deepcopy(start_position), np.array((0, 0)), angle, 0)
+        pods = [racer]
+        if blocker_nn is not None:
+            blocker = Pod(deepcopy(start_position), np.array((0, 0)), angle, 0)
+            pods.append(blocker)
 
         # Debug data
         racer_path = []
@@ -56,7 +59,7 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
             blocker_path.append(deepcopy(start_position))
             inputs.append([0, 0, 0, 0])
 
-        simulator = PodRaceSimulator(checkpoints, [racer, blocker])
+        simulator = PodRaceSimulator(checkpoints, pods)
         for step in range(NUMBER_OF_DRIVE_STEPS):
             # Evolve opponent racer
             velocity_angle, speed = get_relative_angle_and_distance(racer.velocity, racer.angle)
@@ -67,22 +70,27 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
             nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance)
             nn_outputs = racer_nn.evaluate(nn_inputs)
             racer_steer, racer_thrust, racer_command = transform_nn_outputs_to_instructions(nn_outputs)
+            simulator_inputs = [[racer.angle + racer_steer, racer_thrust, racer_command]]
 
             # Evolve blocker
-            velocity_angle, speed = get_relative_angle_and_distance(blocker.velocity, blocker.angle)
-            racer_angle, racer_distance = get_relative_angle_and_distance(racer.position - blocker.position, blocker.angle)
-            checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - blocker.position, blocker.angle)
-            nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, racer_angle, racer_distance, checkpoint_angle, checkpoint_distance)
-            nn_outputs = blocker_nn.evaluate(nn_inputs)
-            blocker_steer, blocker_thrust, blocker_command = transform_nn_outputs_to_instructions(nn_outputs)
+            if blocker_nn is not None:
+                velocity_angle, speed = get_relative_angle_and_distance(blocker.velocity, blocker.angle)
+                racer_angle, racer_distance = get_relative_angle_and_distance(racer.position - blocker.position, blocker.angle)
+                checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - blocker.position, blocker.angle)
+                nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, racer_angle, racer_distance, checkpoint_angle, checkpoint_distance)
+                nn_outputs = blocker_nn.evaluate(nn_inputs)
+                blocker_steer, blocker_thrust, blocker_command = transform_nn_outputs_to_instructions(nn_outputs)
+                simulator_inputs.append([blocker.angle + blocker_steer, blocker_thrust, blocker_command])
 
-            if record_path:
-                racer_path.append(deepcopy(racer.position))
-                blocker_path.append(deepcopy(blocker.position))
-                inputs.append([[round(math.degrees(racer_steer)), int(racer_thrust) if racer_command is None else racer_command],
-                               [round(math.degrees(blocker_steer)), int(blocker_thrust) if blocker_command is None else blocker_command]])
-            simulator.single_step([[racer.angle + racer_steer, racer_thrust, racer_command],
-                                   [blocker.angle + blocker_steer, blocker_thrust, blocker_command]])
+                if record_path:
+                    racer_path.append(deepcopy(racer.position))
+                    inputs_this_step = [round(math.degrees(racer_steer)), int(racer_thrust) if racer_command is None else racer_command]
+                    if blocker_nn is not None:
+                        blocker_path.append(deepcopy(blocker.position))
+                        inputs_this_step.append([round(math.degrees(blocker_steer)), int(blocker_thrust) if blocker_command is None else blocker_command])
+                    inputs.append(inputs_this_step)
+
+            simulator.single_step(simulator_inputs)
 
         # Score is how far the opponent racer gets - we want to minimize this
         distance_to_next_checkpoint = get_distance(checkpoints[racer.next_checkpoint_id] - racer.position)
@@ -118,4 +126,6 @@ def train_pod_blocker(racer_file, output_file, blockers_seed_file):
         blocker.pickle_neuron_config(output_file)
 
 if __name__ == '__main__':
+    #train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config_test.txt', None)
     train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config2.txt', 'nn_data/blocker_config.txt')
+
