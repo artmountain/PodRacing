@@ -22,6 +22,9 @@ class GeneticAlgorithm:
     def configure_next_generation(self):
         pass
 
+    def on_generation_complete(self, population):
+        pass
+
     def add_gene_to_pool(self, gene):
         score = self.score_gene(gene)
         self.population.append([gene, score])
@@ -91,6 +94,9 @@ class GeneticAlgorithm:
             self.population = sorted(new_population, key=lambda x: x[1], reverse=True)[:self.population_size]
             print(f'Generation {generation}. Best score: {self.population[0][1]}')
             print(f'All scores: {np.around(np.array([g[1] for g in self.population]), 2).tolist()}')
+
+            # Do anything required at the end of the generation
+            self.on_generation_complete(self.population)
 
     def get_population(self):
         return self.population

@@ -13,7 +13,7 @@ from PodRacerFunctions import transform_race_data_to_nn_inputs, transform_nn_out
 from TrainPodRacer import PodRacerGeneticAlgorithm, RACER_NN_CONFIG, NUMBER_OF_DRIVE_STEPS, \
     POPULATION_SIZE, NN_MUTATION_RATE, RANDOM_VARIATION, NUMBER_OF_RACER_GENERATIONS
 
-NUMBER_OF_BLOCKER_TRAINING_COURSES = 5
+NUMBER_OF_BLOCKER_TRAINING_COURSES = 10
 
 class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
     def __init__(self, racer, blocker_nn_config, population_size, mutation_rate, random_variation):
@@ -44,8 +44,8 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
         angle = get_angle(checkpoints[0] - start_position)
         racer = Pod(deepcopy(start_position), np.array((0, 0)), angle, 0)
         pods = [racer]
-        if blocker_nn is not None:
-            blocker = Pod(deepcopy(start_position), np.array((0, 0)), angle, 0)
+        blocker = Pod(deepcopy(start_position), np.array((0, 0)), angle, 0) if blocker_nn is not None else None
+        if blocker is not None:
             pods.append(blocker)
 
         # Debug data
@@ -96,6 +96,8 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
         distance_to_next_checkpoint = get_distance(checkpoints[racer.next_checkpoint_id] - racer.position)
         score = 100 * (racer.checkpoints_passed + transform_distance_to_input(distance_to_next_checkpoint))
         return score, paths, next_checkpoints, inputs
+
+    def on_generation_complete(self, population):
 
 def train_pod_blocker(racer_file, output_file, blockers_seed_file):
     # Get racer to train against
