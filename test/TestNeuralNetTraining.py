@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from NeuralNet import createNeuralNetwork
 
+
 class TestNeuralNetTrainToPrimitiveFunctions(unittest.TestCase):
     def test_train_neural_network_with_trig_functions(self):
         #plot = False

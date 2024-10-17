@@ -95,7 +95,7 @@ class GeneticAlgorithm:
             print(f'Generation {generation}. Best score: {self.population[0][1]}')
             print(f'All scores: {np.around(np.array([g[1] for g in self.population]), 2).tolist()}')
 
-            # Do anything required at the end of the generation
+            # Do anything that is required at the end of the generation
             self.on_generation_complete(self.population)
 
     def get_population(self):

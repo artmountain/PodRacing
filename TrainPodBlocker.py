@@ -26,7 +26,7 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
         for layer in range(1, len(blocker_nn_config)):
             self.gene_length += (blocker_nn_config[layer - 1] + 1) * blocker_nn_config[layer]
 
-        GeneticAlgorithm.__init__(self, self.gene_length, population_size, True, mutation_rate, random_variation, True)
+        GeneticAlgorithm.__init__(self, self.gene_length, population_size, True, mutation_rate, random_variation, False)
 
     def score_gene(self, gene):
         blocker = PodRacerGeneticAlgorithm.build_racer_from_gene(self.blocker_nn_config, gene)
@@ -42,9 +42,9 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
         # Create opponent racer and blocker
         start_position = course.get_start_position()
         angle = get_angle(checkpoints[0] - start_position)
-        racer = Pod(deepcopy(start_position), np.array((0, 0)), angle, 0)
+        racer = Pod(deepcopy(start_position) - np.array((600, 0)), np.array((0, 0)), angle, 0)
         pods = [racer]
-        blocker = Pod(deepcopy(start_position), np.array((0, 0)), angle, 0) if blocker_nn is not None else None
+        blocker = Pod(deepcopy(start_position) + np.array((600, 0)), np.array((0, 0)), angle, 0) if blocker_nn is not None else None
         if blocker is not None:
             pods.append(blocker)
 
@@ -98,6 +98,11 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
         return score, paths, next_checkpoints, inputs
 
     def on_generation_complete(self, population):
+        output_file = 'nn_data/temp_blocker_config.txt'
+        open(output_file, "w").close()
+        blocker = PodRacerGeneticAlgorithm.build_racer_from_gene(RACER_NN_CONFIG, population[0][0])
+        blocker.pickle_neuron_config(output_file)
+
 
 def train_pod_blocker(racer_file, output_file, blockers_seed_file):
     # Get racer to train against
@@ -128,6 +133,9 @@ def train_pod_blocker(racer_file, output_file, blockers_seed_file):
         blocker.pickle_neuron_config(output_file)
 
 if __name__ == '__main__':
-    #train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config_test.txt', None)
-    train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config2.txt', 'nn_data/blocker_config.txt')
+    train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config_test.txt', None)
+    #train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config2.txt', 'nn_data/blocker_config.txt')
+    #train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config3.txt', 'nn_data/blocker_config2.txt')
+    #train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config4.txt', 'nn_data/blocker_config3.txt')
+    #train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config5.txt', 'nn_data/blocker_config4.txt')
 

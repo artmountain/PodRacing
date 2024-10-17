@@ -100,5 +100,7 @@ def plot_pod_paths(checkpoints, paths, pause_time):
 
 if __name__ == '__main__':
     #generate_and_display_race(open('nn_data/live_racer_nn_config.txt').readlines()[0], None)
+    #generate_and_display_race(open('nn_data/live_racer_nn_config.txt').readlines()[0],
+    #                          open('nn_data/live_blocker_nn_config.txt').readlines()[0])
     generate_and_display_race(open('nn_data/live_racer_nn_config.txt').readlines()[0],
-                              open('nn_data/live_blocker_nn_config.txt').readlines()[0])
+                              open('nn_data/blocker_config2.txt').readlines()[0])
