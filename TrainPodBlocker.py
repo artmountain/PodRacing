@@ -7,13 +7,13 @@ from Courses import create_courses
 from GeneticAlgorithm import GeneticAlgorithm
 from NeuralNet import NeuralNetwork
 from PodRaceSimulator import PodRaceSimulator, Pod
-from PodRacerFunctions import transform_race_data_to_nn_inputs, transform_nn_outputs_to_instructions, \
-    transform_distance_to_input, get_angle, get_relative_angle_and_distance, \
-    get_distance
+from PodRacerFunctions import transform_distance_to_input, get_angle, get_distance, get_next_racer_action, \
+    get_next_blocker_action
 from TrainPodRacer import PodRacerGeneticAlgorithm, RACER_NN_CONFIG, NUMBER_OF_DRIVE_STEPS, \
     POPULATION_SIZE, NN_MUTATION_RATE, RANDOM_VARIATION, NUMBER_OF_RACER_GENERATIONS
 
 NUMBER_OF_BLOCKER_TRAINING_COURSES = 10
+
 
 class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
     def __init__(self, racer, blocker_nn_config, population_size, mutation_rate, random_variation):
@@ -62,24 +62,12 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
         simulator = PodRaceSimulator(checkpoints, pods)
         for step in range(NUMBER_OF_DRIVE_STEPS):
             # Evolve opponent racer
-            velocity_angle, speed = get_relative_angle_and_distance(racer.velocity, racer.angle)
-            checkpoint_position = checkpoints[racer.next_checkpoint_id % len(checkpoints)]
-            checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - racer.position, racer.angle)
-            next_checkpoint_position = checkpoints[(racer.next_checkpoint_id + 1) % len(checkpoints)]
-            next_checkpoint_angle, next_checkpoint_distance = get_relative_angle_and_distance(next_checkpoint_position - racer.position, racer.angle)
-            nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance)
-            nn_outputs = racer_nn.evaluate(nn_inputs)
-            racer_steer, racer_thrust, racer_command = transform_nn_outputs_to_instructions(nn_outputs)
+            racer_steer, racer_thrust, racer_command = get_next_racer_action(racer, checkpoints, racer_nn)
             simulator_inputs = [[racer.angle + racer_steer, racer_thrust, racer_command]]
 
             # Evolve blocker
             if blocker_nn is not None:
-                velocity_angle, speed = get_relative_angle_and_distance(blocker.velocity, blocker.angle)
-                racer_angle, racer_distance = get_relative_angle_and_distance(racer.position - blocker.position, blocker.angle)
-                checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - blocker.position, blocker.angle)
-                nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, racer_angle, racer_distance, checkpoint_angle, checkpoint_distance)
-                nn_outputs = blocker_nn.evaluate(nn_inputs)
-                blocker_steer, blocker_thrust, blocker_command = transform_nn_outputs_to_instructions(nn_outputs)
+                blocker_steer, blocker_thrust, blocker_command = get_next_blocker_action(blocker, racer, checkpoints, blocker_nn)
                 simulator_inputs.append([blocker.angle + blocker_steer, blocker_thrust, blocker_command])
 
                 if record_path:
@@ -132,10 +120,10 @@ def train_pod_blocker(racer_file, output_file, blockers_seed_file):
         blocker = PodRacerGeneticAlgorithm.build_racer_from_gene(RACER_NN_CONFIG, gene[0])
         blocker.pickle_neuron_config(output_file)
 
+
 if __name__ == '__main__':
     train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config_test.txt', None)
-    #train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config2.txt', 'nn_data/blocker_config.txt')
-    #train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config3.txt', 'nn_data/blocker_config2.txt')
-    #train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config4.txt', 'nn_data/blocker_config3.txt')
-    #train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config5.txt', 'nn_data/blocker_config4.txt')
-
+    # train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config2.txt', 'nn_data/blocker_config.txt')
+    # train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config3.txt', 'nn_data/blocker_config2.txt')
+    # train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config4.txt', 'nn_data/blocker_config3.txt')
+    # train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config5.txt', 'nn_data/blocker_config4.txt')

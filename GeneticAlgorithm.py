@@ -3,6 +3,7 @@ import abc
 
 import numpy as np
 
+
 class GeneticAlgorithm:
     def __init__(self, gene_length, population_size, use_mutations, mutation_rate, random_variation, keep_best_gene):
         self.gene_length = gene_length

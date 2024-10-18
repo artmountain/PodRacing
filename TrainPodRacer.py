@@ -7,25 +7,23 @@ from Courses import create_courses
 from GeneticAlgorithm import GeneticAlgorithm
 from NeuralNet import NeuralNetwork
 from PodRaceSimulator import PodRaceSimulator, Pod
-from PodRacerFunctions import transform_race_data_to_nn_inputs, transform_nn_outputs_to_instructions, \
-    transform_distance_to_input, get_angle, get_relative_angle_and_distance, \
-    get_distance
+from PodRacerFunctions import transform_distance_to_input, get_angle, get_distance, get_next_racer_action
 
 # Test flag
 TEST = False
-#TEST = True
+# TEST = True
 
 # NN config. First entry is size of inputs. Others are number of nodes in each layer
 RACER_NN_INPUTS = 6
 RACER_NN_OUTPUTS = 3
 RACER_MID_LAYER_SIZE = 4
-RACER_NN_CONFIG = [RACER_NN_INPUTS, RACER_NN_INPUTS, RACER_MID_LAYER_SIZE, RACER_NN_OUTPUTS]
+RACER_NN_CONFIG = [RACER_NN_INPUTS, RACER_NN_INPUTS, RACER_MID_LAYER_SIZE, RACER_MID_LAYER_SIZE, RACER_NN_OUTPUTS]
 
 # Training configuration
 POPULATION_SIZE = 5 if TEST else 50
 NUMBER_OF_DRIVE_STEPS = 10 if TEST else 200
 NUMBER_OF_TRAINING_COURSES = 10
-NUMBER_OF_RACER_GENERATIONS = 10 if TEST else 500
+NUMBER_OF_RACER_GENERATIONS = 10 if TEST else 1000
 NN_MUTATION_RATE = 0.05
 RANDOM_VARIATION = 0.2
 
@@ -63,16 +61,7 @@ class PodRacerGeneticAlgorithm(GeneticAlgorithm):
         pod = Pod(start_position, np.array((0, 0)), get_angle(checkpoints[0] - start_position), 0)
         simulator = PodRaceSimulator(checkpoints, [pod])
         for step in range(NUMBER_OF_DRIVE_STEPS):
-            velocity_angle, speed = get_relative_angle_and_distance(pod.velocity, pod.angle)
-            checkpoint_position = checkpoints[pod.next_checkpoint_id]
-            checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - pod.position, pod.angle)
-            next_checkpoint_position = checkpoints[(pod.next_checkpoint_id + 1) % len(checkpoints)]
-            next_checkpoint_angle, next_checkpoint_distance = get_relative_angle_and_distance(next_checkpoint_position - pod.position, pod.angle)
-
-            nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance)
-            nn_outputs = racer_nn.evaluate(nn_inputs)
-            steer, thrust, command = transform_nn_outputs_to_instructions(nn_outputs)
-
+            steer, thrust, command = get_next_racer_action(pod, checkpoints, racer_nn)
             if record_path:
                 path.append(deepcopy(pod.position))
                 next_checkpoints.append(pod.next_checkpoint_id)
@@ -109,6 +98,7 @@ class PodRacerGeneticAlgorithm(GeneticAlgorithm):
         racer = NeuralNetwork(nn_config[0], nn_config[-1], weights, biases)
         return racer
 
+
 def train_pod_racer(output_file, racers_seed_file):
     # Set up genetic algorithm
     racer_training_ga = PodRacerGeneticAlgorithm(RACER_NN_CONFIG, POPULATION_SIZE, NN_MUTATION_RATE, RANDOM_VARIATION)
@@ -133,8 +123,10 @@ def train_pod_racer(output_file, racers_seed_file):
         racer = PodRacerGeneticAlgorithm.build_racer_from_gene(RACER_NN_CONFIG, gene[0])
         racer.pickle_neuron_config(output_file)
 
+
 if __name__ == '__main__':
-    #train_pod_racer('nn_data/racer_config2.txt', 'nn_data/racer_config.txt')
-    #train_pod_racer('nn_data/racer_config3.txt', 'nn_data/racer_config2.txt')
-    #train_pod_racer('nn_data/racer_config4.txt', 'nn_data/racer_config3.txt')
-    train_pod_racer('nn_data/racer_config5.txt', 'nn_data/racer_config4.txt')
+    # train_pod_racer('nn_data/racer_config.txt', None)
+    # train_pod_racer('nn_data/racer_config2.txt', 'nn_data/racer_config.txt')
+    # train_pod_racer('nn_data/racer_config3.txt', 'nn_data/racer_config2.txt')
+    train_pod_racer('nn_data/racer_config4.txt', 'nn_data/racer_config3.txt')
+    # train_pod_racer('nn_data/racer_config5.txt', 'nn_data/racer_config4.txt')

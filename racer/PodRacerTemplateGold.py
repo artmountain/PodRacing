@@ -68,20 +68,13 @@ while True:
 
         # Create neural network inputs
         # Angles are relative to current heading and are all in radians except the input checkpoint angle
-        velocity_angle, speed = get_relative_angle_and_distance(pod.velocity, pod.angle)
+        velocity_angle, speed = get_relative_angle_and_distance(pod.velocity, pod.angle)  # todo : remove this - not needed
         print(f'velocity : {pod.velocity} angle : {round(math.degrees(pod.angle))}  vel angle : {round(math.degrees(velocity_angle))}', file=sys.stderr, flush=True)
 
         # Racer and blocker behave differently
         if pod_index == 0:
             # Racer - inputs are [velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance]
-            checkpoint_position = checkpoints[pod.next_checkpoint_id]
-            checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - pod.position, pod.angle)
-            next_checkpoint_position = checkpoints[(pod.next_checkpoint_id + 1) % checkpoint_count]
-            next_checkpoint_angle, next_checkpoint_distance = get_relative_angle_and_distance(next_checkpoint_position - pod.position, pod.angle)
-            nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, checkpoint_angle, checkpoint_distance, next_checkpoint_angle, next_checkpoint_distance)
-            #print(f'Raw inputs: velocity angle {math.degrees(velocity_angle)}, speed : {speed}  checkpointAngle: {math.degrees(checkpoint_angle)}  Checkpoint dist: {checkpoint_distance} Next ch angle: {math.degrees(next_checkpoint_angle)}  Next cp dist: {next_checkpoint_distance}', file=sys.stderr, flush=True)
-            nn_outputs = racer.evaluate(nn_inputs)
-            steer, thrust, command = transform_nn_outputs_to_instructions(nn_outputs)
+            steer, thrust, command = get_next_racer_action(pod, checkpoints, racer)
             target_angle = pod.angle + steer
             thrust = round(thrust)
             print(f'Steer: {round(math.degrees(steer))} Thrust: {thrust} Command: {command}', file=sys.stderr, flush=True)
