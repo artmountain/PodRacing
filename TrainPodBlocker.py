@@ -9,10 +9,13 @@ from NeuralNet import NeuralNetwork
 from PodRaceSimulator import PodRaceSimulator, Pod
 from PodRacerFunctions import transform_distance_to_input, get_angle, get_distance, get_next_racer_action, \
     get_next_blocker_action
-from TrainPodRacer import PodRacerGeneticAlgorithm, RACER_NN_CONFIG, NUMBER_OF_DRIVE_STEPS, \
-    POPULATION_SIZE, NN_MUTATION_RATE, RANDOM_VARIATION, NUMBER_OF_RACER_GENERATIONS
+from TrainPodRacer import PodRacerGeneticAlgorithm, NUMBER_OF_DRIVE_STEPS, \
+    POPULATION_SIZE, NN_MUTATION_RATE, RANDOM_VARIATION, RACER_MID_LAYER_SIZE, RACER_NN_OUTPUTS
 
 NUMBER_OF_BLOCKER_TRAINING_COURSES = 10
+NUMBER_OF_BLOCKER_GENERATIONS = 500
+BLOCKER_NN_INPUTS = 8
+BLOCKER_NN_CONFIG = [BLOCKER_NN_INPUTS, BLOCKER_NN_INPUTS, RACER_MID_LAYER_SIZE, RACER_MID_LAYER_SIZE, RACER_NN_OUTPUTS]
 
 
 class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
@@ -88,36 +91,36 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
     def on_generation_complete(self, population):
         output_file = 'nn_data/temp_blocker_config.txt'
         open(output_file, "w").close()
-        blocker = PodRacerGeneticAlgorithm.build_racer_from_gene(RACER_NN_CONFIG, population[0][0])
+        blocker = PodRacerGeneticAlgorithm.build_racer_from_gene(BLOCKER_NN_CONFIG, population[0][0])
         blocker.pickle_neuron_config(output_file)
 
 
 def train_pod_blocker(racer_file, output_file, blockers_seed_file):
     # Get racer to train against
     with open(racer_file, 'r') as f:
-        racer = NeuralNetwork.create_from_json(f.readlines()[0].rstrip(), RACER_NN_CONFIG)
+        racer = NeuralNetwork.create_from_json(f.readlines()[0].rstrip(), BLOCKER_NN_CONFIG)
 
     # Set up genetic algorithm
-    blocker_training_ga = PodBlockerGeneticAlgorithm(racer, RACER_NN_CONFIG, POPULATION_SIZE, NN_MUTATION_RATE, RANDOM_VARIATION)
+    blocker_training_ga = PodBlockerGeneticAlgorithm(racer, BLOCKER_NN_CONFIG, POPULATION_SIZE, NN_MUTATION_RATE, RANDOM_VARIATION)
     if blockers_seed_file is not None:
         # Start from pre-configured blockers
         with open(blockers_seed_file, 'r') as f:
             for line in f.readlines():
-                blocker = NeuralNetwork.create_from_json(line.rstrip(), RACER_NN_CONFIG)
-                gene = PodRacerGeneticAlgorithm.get_gene_from_racer(RACER_NN_CONFIG, blocker)
+                blocker = NeuralNetwork.create_from_json(line.rstrip(), BLOCKER_NN_CONFIG)
+                gene = PodRacerGeneticAlgorithm.get_gene_from_racer(BLOCKER_NN_CONFIG, blocker)
                 blocker_training_ga.add_gene_to_pool(gene)
 
     # Add in random blockers to complete the population
     blocker_training_ga.complete_population_with_random_genes()
 
     # Evolve the genetic algorithm
-    blocker_training_ga.evolve(NUMBER_OF_RACER_GENERATIONS)
+    blocker_training_ga.evolve(NUMBER_OF_BLOCKER_GENERATIONS)
 
     # Output best racers
     population = blocker_training_ga.get_population()
     open(output_file, "w").close()
     for gene in population:
-        blocker = PodRacerGeneticAlgorithm.build_racer_from_gene(RACER_NN_CONFIG, gene[0])
+        blocker = PodRacerGeneticAlgorithm.build_racer_from_gene(BLOCKER_NN_CONFIG, gene[0])
         blocker.pickle_neuron_config(output_file)
 
 

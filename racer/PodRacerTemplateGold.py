@@ -93,12 +93,7 @@ while True:
             # todo remove
             lead_opponent_id = 1 if len(opponent_next_checkpoints[1]) > len(opponent_next_checkpoints[0]) else 0
             print(f'Lead opponent pod : {lead_opponent_id} targeting checkpoint {opponent_pods[lead_opponent_id].next_checkpoint_id}', file=sys.stderr, flush=True)
-            opponent_angle, opponent_distance = get_relative_angle_and_distance(opponent.position - pod.position, pod.angle)
-            checkpoint_position = checkpoints[opponent.next_checkpoint_id]
-            checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - pod.position, pod.angle)
-            nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, opponent_angle, opponent_distance, checkpoint_angle, checkpoint_distance)
-            nn_outputs = blocker.evaluate(nn_inputs)
-            blocker_steer, blocker_thrust, command = transform_nn_outputs_to_instructions(nn_outputs)
+            blocker_steer, blocker_thrust, command = get_next_blocker_action(pod, opponent_pods[lead_opponent_id], checkpoints, blocker_nn)
             target_angle = pod.angle + blocker_steer
             thrust = round(blocker_thrust)
             sim_inputs.append([blocker_steer, blocker_thrust, command])

@@ -83,7 +83,18 @@ def get_next_blocker_action(blocker, racer, checkpoints, blocker_nn):
     racer_angle, racer_distance = get_relative_angle_and_distance(racer.position - blocker.position, blocker.angle)
     checkpoint_position = checkpoints[racer.next_checkpoint_id]
     checkpoint_angle, checkpoint_distance = get_relative_angle_and_distance(checkpoint_position - blocker.position, blocker.angle)
-    nn_inputs = transform_race_data_to_nn_inputs(velocity_angle, speed, racer_angle, racer_distance, checkpoint_angle, checkpoint_distance)
+    next_checkpoint_position = checkpoints[(racer.next_checkpoint_id + 1) % len(checkpoints)]
+    next_checkpoint_angle, next_checkpoint_distance = get_relative_angle_and_distance(next_checkpoint_position - blocker.position, blocker.angle)
+    nn_inputs = [
+        velocity_angle * math.pi + 0.5,
+        transform_speed_to_input(speed),
+        racer_angle * math.pi + 0.5,
+        transform_distance_to_input(racer_distance),
+        checkpoint_angle * math.pi + 0.5,
+        transform_distance_to_input(checkpoint_distance),
+        next_checkpoint_angle * math.pi + 0.5,
+        transform_distance_to_input(next_checkpoint_distance)
+    ]
     nn_outputs = blocker_nn.evaluate(nn_inputs)
     steer, thrust, command = transform_nn_outputs_to_instructions(nn_outputs)
     return steer, thrust, command
