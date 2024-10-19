@@ -25,6 +25,7 @@ print(f'Checkpoints: {checkpoints}', file=sys.stderr, flush=True)
 
 initialized = False
 opponent_next_checkpoints = [[0], [0]]
+pod_boost_used = [False, False]
 
 # game loop
 while True:
@@ -81,7 +82,7 @@ while True:
 
             # On the first step, override the calculated values
             if not initialized:
-                target_angle = checkpoint_angle
+                target_angle, _ = get_relative_angle_and_distance(checkpoints[pod.next_checkpoint_id] - pod.position, pod.angle)
                 steer = 0
                 thrust = 100
                 initialized = True
@@ -93,7 +94,7 @@ while True:
             # todo remove
             lead_opponent_id = 1 if len(opponent_next_checkpoints[1]) > len(opponent_next_checkpoints[0]) else 0
             print(f'Lead opponent pod : {lead_opponent_id} targeting checkpoint {opponent_pods[lead_opponent_id].next_checkpoint_id}', file=sys.stderr, flush=True)
-            blocker_steer, blocker_thrust, command = get_next_blocker_action(pod, opponent_pods[lead_opponent_id], checkpoints, blocker_nn)
+            blocker_steer, blocker_thrust, command = get_next_blocker_action(pod, opponent_pods[lead_opponent_id], checkpoints, blocker)
             target_angle = pod.angle + blocker_steer
             thrust = round(blocker_thrust)
             sim_inputs.append([blocker_steer, blocker_thrust, command])
@@ -101,8 +102,8 @@ while True:
         # Output the target position followed by the power (0 <= thrust <= 100)
         target_position = list(map(round, pod.position + 10000 * np.array((math.sin(target_angle), math.cos(target_angle)))))
         if command == 'BOOST':
-            thrust = 100 if pod.boost_used else 'BOOST'
-            pod.boost_used = True
+            thrust = 100 if pod_boost_used[pod_index] else 'BOOST'
+            pod_boost_used[pod_index] = True
         outputs.append(np.append(deepcopy(target_position), thrust))
 
     # Record state
