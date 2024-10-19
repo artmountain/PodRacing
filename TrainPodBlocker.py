@@ -10,10 +10,16 @@ from PodRaceSimulator import PodRaceSimulator, Pod
 from PodRacerFunctions import transform_distance_to_input, get_angle, get_distance, get_next_racer_action, \
     get_next_blocker_action
 from TrainPodRacer import PodRacerGeneticAlgorithm, NUMBER_OF_DRIVE_STEPS, \
-    POPULATION_SIZE, NN_MUTATION_RATE, RANDOM_VARIATION, RACER_MID_LAYER_SIZE, RACER_NN_OUTPUTS
+    POPULATION_SIZE, NN_MUTATION_RATE, RANDOM_VARIATION, RACER_MID_LAYER_SIZE, RACER_NN_OUTPUTS, \
+    NUMBER_OF_TRAINING_COURSES
 
-NUMBER_OF_BLOCKER_TRAINING_COURSES = 10
-NUMBER_OF_BLOCKER_GENERATIONS = 500
+# Test flag
+# TEST = False
+TEST = True
+
+POPULATION_SIZE = 5 if TEST else 50
+NUMBER_OF_DRIVE_STEPS = 10 if TEST else 200
+NUMBER_OF_BLOCKER_GENERATIONS = 10 if TEST else 1000
 BLOCKER_NN_INPUTS = 8
 BLOCKER_NN_CONFIG = [BLOCKER_NN_INPUTS, BLOCKER_NN_INPUTS, RACER_MID_LAYER_SIZE, RACER_MID_LAYER_SIZE, RACER_NN_OUTPUTS]
 
@@ -36,7 +42,7 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
         return np.mean([self.evaluate_racer_and_blocker(course, self.racer, None, False)[0] - self.evaluate_racer_and_blocker(course, self.racer, blocker, False)[0] for course in self.courses])
 
     def configure_next_generation(self):
-        self.courses = create_courses(NUMBER_OF_BLOCKER_TRAINING_COURSES)
+        self.courses = create_courses(NUMBER_OF_TRAINING_COURSES)
 
     @staticmethod
     def evaluate_racer_and_blocker(course, racer_nn, blocker_nn, record_path):
@@ -89,10 +95,17 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
         return score, paths, next_checkpoints, inputs
 
     def on_generation_complete(self, population):
+        # Output best config to temporary file
         output_file = 'nn_data/temp_blocker_config.txt'
         open(output_file, "w").close()
         blocker = PodRacerGeneticAlgorithm.build_racer_from_gene(BLOCKER_NN_CONFIG, population[0][0])
         blocker.pickle_neuron_config(output_file)
+
+        # Score best blocker and output racer score with and without blocker to test effectiveness
+        course = self.courses[0]
+        score_racer_alone = np.around(self.evaluate_racer_and_blocker(course, self.racer, None, False)[0], 2)
+        score_with_blocker = np.around(self.evaluate_racer_and_blocker(course, self.racer, blocker, False)[0], 2)
+        print(f'Racer score {score_racer_alone}, With blocker {score_with_blocker}, blocker impact: {score_racer_alone - score_with_blocker}')
 
 
 def train_pod_blocker(racer_file, output_file, blockers_seed_file):
