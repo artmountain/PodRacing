@@ -21,9 +21,10 @@ checkpoints = []
 for i in range(checkpoint_count):
     checkpoint_x, checkpoint_y = [int(j) for j in input().split()]
     checkpoints.append(np.array((checkpoint_x, checkpoint_y)))
-print(f'Checkpoints: {checkpoints}', file=sys.stderr, flush=True)
+# print(f'Checkpoints: {checkpoints}', file=sys.stderr, flush=True)
 
 initialized = False
+my_next_checkpoints = [[0], [0]]
 opponent_next_checkpoints = [[0], [0]]
 pod_boost_used = [False, False]
 
@@ -43,8 +44,12 @@ while True:
         velocity = np.array((vx, vy))
         absolute_checkpoint_angle = get_angle(checkpoints[next_checkpoint_id] - position)
         all_pods.append(Pod(position, velocity, pod_angle, next_checkpoint_id))
-        if i > 1 and next_checkpoint_id != opponent_next_checkpoints[i - 2][-1]:
-            opponent_next_checkpoints[i - 2].append(next_checkpoint_id)
+        if i > 1:
+            if next_checkpoint_id != opponent_next_checkpoints[i - 2][-1]:
+                opponent_next_checkpoints[i - 2].append(next_checkpoint_id)
+        else:
+            if next_checkpoint_id != my_next_checkpoints[i][-1]:
+                my_next_checkpoints[i].append(next_checkpoint_id)
 
     pods = all_pods[:2]
     opponent_pods = all_pods[2:]
@@ -53,10 +58,8 @@ while True:
     for pod_index in range(2):
         pod = pods[pod_index]
 
-        # Create neural network inputs
         # Angles are relative to current heading and are all in radians except the input checkpoint angle
-        velocity_angle, speed = get_relative_angle_and_distance(pod.velocity, pod.angle)  # todo : remove this - not needed
-        print(f'velocity : {pod.velocity} angle : {round(math.degrees(pod.angle))}  vel angle : {round(math.degrees(velocity_angle))}', file=sys.stderr, flush=True)
+        # print(f'velocity : {pod.velocity} angle : {round(math.degrees(pod.angle))}  vel angle : {round(math.degrees(velocity_angle))}', file=sys.stderr, flush=True)
 
         # Racer and blocker behave differently
         if pod_index == 0:
@@ -64,10 +67,11 @@ while True:
             steer, thrust, command = get_next_racer_action(pod, checkpoints, racer)
             target_angle = pod.angle + steer
             thrust = round(thrust)
-            print(f'Steer: {round(math.degrees(steer))} Thrust: {thrust} Command: {command}', file=sys.stderr, flush=True)
+            # print(f'Steer: {round(math.degrees(steer))} Thrust: {thrust} Command: {command}', file=sys.stderr, flush=True)
 
             # On the first step, override the calculated values
             if not initialized:
+                # TODO : REMOVE THIS? Neural net has it
                 target_angle, _ = get_relative_angle_and_distance(checkpoints[pod.next_checkpoint_id] - pod.position, pod.angle)
                 steer = 0
                 thrust = 100
@@ -76,10 +80,14 @@ while True:
             # Blocker - inputs are [velocity_angle, speed, velocity_angle, speed, racer_angle, racer_distance, checkpoint_angle, checkpoint_distance]
             opponent = opponent_pods[1 if len(opponent_next_checkpoints[1]) > len(opponent_next_checkpoints[0]) else 0]
 
-            # todo remove
-            lead_opponent_id = 1 if len(opponent_next_checkpoints[1]) > len(opponent_next_checkpoints[0]) else 0
-            print(f'Lead opponent pod : {lead_opponent_id} targeting checkpoint {opponent_pods[lead_opponent_id].next_checkpoint_id}', file=sys.stderr, flush=True)
-            blocker_steer, blocker_thrust, command = get_next_blocker_action(pod, opponent_pods[lead_opponent_id], checkpoints, blocker)
+            if min(my_next_checkpoints) > max(opponent_next_checkpoints):
+                # We are winning - use racer config
+                blocker_steer, blocker_thrust, command = get_next_racer_action(pod, checkpoints, racer)
+            else:
+                # Act as blocker
+                lead_opponent_id = 1 if len(opponent_next_checkpoints[1]) > len(opponent_next_checkpoints[0]) else 0
+                print(f'Lead opponent pod : {lead_opponent_id} targeting checkpoint {opponent_pods[lead_opponent_id].next_checkpoint_id}', file=sys.stderr, flush=True)
+                blocker_steer, blocker_thrust, command = get_next_blocker_action(pod, opponent_pods[lead_opponent_id], checkpoints, blocker)
             target_angle = pod.angle + blocker_steer
             thrust = round(blocker_thrust)
 
