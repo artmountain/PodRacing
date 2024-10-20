@@ -9,9 +9,9 @@ import itertools
 # INSERT SIMULATOR
 
 # Build neural network
-racer_nn_data_str = '% INSERT RACER NN CONFIG %'
-blocker_nn_data_str = '% INSERT BLOCKER NN CONFIG %'
-nn_shape = (6, 6, 4, 3)
+# INSERT NN CONFIGS
+racer_nn_data_str = '% INSERT RACER NN PARAMETERS %'
+blocker_nn_data_str = '% INSERT BLOCKER NN PARAMETERS %'
 racer = NeuralNetwork.create_from_json(racer_nn_data_str, nn_shape)
 blocker = NeuralNetwork.create_from_json(blocker_nn_data_str, nn_shape)
 

@@ -6,12 +6,12 @@ import numpy as np
 from Courses import create_courses
 from GeneticAlgorithm import GeneticAlgorithm
 from NeuralNet import NeuralNetwork
+from NeuralNetConfigs import BLOCKER_NN_CONFIG
 from PodRaceSimulator import PodRaceSimulator, Pod
 from PodRacerFunctions import transform_distance_to_input, get_angle, get_distance, get_next_racer_action, \
     get_next_blocker_action
 from TrainPodRacer import PodRacerGeneticAlgorithm, NUMBER_OF_DRIVE_STEPS, \
-    POPULATION_SIZE, NN_MUTATION_RATE, RANDOM_VARIATION, RACER_MID_LAYER_SIZE, RACER_NN_OUTPUTS, \
-    NUMBER_OF_TRAINING_COURSES
+    POPULATION_SIZE, NN_MUTATION_RATE, RANDOM_VARIATION, NUMBER_OF_TRAINING_COURSES
 
 # Test flag
 TEST = False
@@ -20,8 +20,6 @@ TEST = False
 POPULATION_SIZE = 5 if TEST else 50
 NUMBER_OF_DRIVE_STEPS = 10 if TEST else 200
 NUMBER_OF_BLOCKER_GENERATIONS = 10 if TEST else 1000
-BLOCKER_NN_INPUTS = 8
-BLOCKER_NN_CONFIG = [BLOCKER_NN_INPUTS, BLOCKER_NN_INPUTS, RACER_MID_LAYER_SIZE, RACER_MID_LAYER_SIZE, RACER_NN_OUTPUTS]
 
 
 class PodBlockerGeneticAlgorithm(GeneticAlgorithm):

@@ -6,18 +6,13 @@ import numpy as np
 from Courses import create_courses
 from GeneticAlgorithm import GeneticAlgorithm
 from NeuralNet import NeuralNetwork
+from NeuralNetConfigs import RACER_NN_CONFIG
 from PodRaceSimulator import PodRaceSimulator, Pod
 from PodRacerFunctions import transform_distance_to_input, get_angle, get_distance, get_next_racer_action
 
 # Test flag
 TEST = False
 # TEST = True
-
-# NN config. First entry is size of inputs. Others are number of nodes in each layer
-RACER_NN_INPUTS = 6
-RACER_NN_OUTPUTS = 3
-RACER_MID_LAYER_SIZE = 4
-RACER_NN_CONFIG = [RACER_NN_INPUTS, RACER_NN_INPUTS, RACER_MID_LAYER_SIZE, RACER_MID_LAYER_SIZE, RACER_NN_OUTPUTS]
 
 # Training configuration
 NUMBER_OF_TRAINING_COURSES = 10
@@ -128,5 +123,5 @@ if __name__ == '__main__':
     # train_pod_racer('nn_data/racer_config.txt', None)
     # train_pod_racer('nn_data/racer_config2.txt', 'nn_data/racer_config.txt')
     # train_pod_racer('nn_data/racer_config3.txt', 'nn_data/racer_config2.txt')
-    train_pod_racer('nn_data/racer_config4.txt', 'nn_data/racer_config3.txt')
-    # train_pod_racer('nn_data/racer_config5.txt', 'nn_data/racer_config4.txt')
+    # train_pod_racer('nn_data/racer_config4.txt', 'nn_data/racer_config3.txt')
+    train_pod_racer('nn_data/racer_config5.txt', 'nn_data/racer_config4.txt')
