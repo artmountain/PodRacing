@@ -29,37 +29,25 @@ pod_boost_used = [False, False]
 
 # game loop
 while True:
-    pods = []
-    for i in range(2):
-        # x: x position of your pod
-        # y: y position of your pod
-        # vx: x speed of your pod
-        # vy: y speed of your pod
-        # angle: angle of your pod
-        # next_check_point_id: next check point id of your pod
+    all_pods = []
+    for i in range(4):
+        # x: x position of the pod
+        # y: y position of the pod
+        # vx: x speed of the pod
+        # vy: y speed of the pod
+        # angle: angle of the pod
+        # next_check_point_id: next check point id of the pod
         x, y, vx, vy, angle, next_checkpoint_id = [int(j) for j in input().split()]
-        #print(f'Pod angle pre : {angle}', file=sys.stderr, flush=True)
         pod_angle = math.radians((270 - angle) % 360 - 180)
-        #print(f'Pod angle post : {round(math.degrees(pod_angle))}', file=sys.stderr, flush=True)
         position = np.array((x, y))
         velocity = np.array((vx, vy))
         absolute_checkpoint_angle = get_angle(checkpoints[next_checkpoint_id] - position)
-        #print(f'Pod angle : {round(math.degrees(pod_angle))}  Input angle : {angle}  CP angle : {round(math.degrees(absolute_checkpoint_angle))}', file=sys.stderr, flush=True)
-        pods.append(Pod(position, velocity, pod_angle, next_checkpoint_id))
-    opponent_pods = []
-    for i in range(2):
-        # x_2: x position of the opponent's pod
-        # y_2: y position of the opponent's pod
-        # vx_2: x speed of the opponent's pod
-        # vy_2: y speed of the opponent's pod
-        # angle_2: angle of the opponent's pod
-        # next_check_point_id_2: next check point id of the opponent's pod
-        x_2, y_2, vx_2, vy_2, angle_2, next_check_point_id_2 = [int(j) for j in input().split()]
-        pod_angle = math.radians((270 - angle_2) % 360 - 180)
-        opponent_pods.append(Pod(np.array((x_2, y_2)), np.array((vx_2, vy_2)), pod_angle, next_check_point_id_2))
-        if next_check_point_id_2 != opponent_next_checkpoints[i][-1]:
-            opponent_next_checkpoints[i].append(next_check_point_id_2)
+        all_pods.append(Pod(position, velocity, pod_angle, next_checkpoint_id))
+        if i > 1 and next_checkpoint_id != opponent_next_checkpoints[i - 2][-1]:
+            opponent_next_checkpoints[i - 2].append(next_checkpoint_id)
 
+    pods = all_pods[:2]
+    opponent_pods = all_pods[2:]
     simulator = PodRaceSimulator(checkpoints, pods)
 
     outputs = []
