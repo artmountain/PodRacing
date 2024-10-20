@@ -93,7 +93,7 @@ class GeneticAlgorithm:
 
             # Filter and select best of population
             self.population = sorted(new_population, key=lambda x: x[1], reverse=True)[:self.population_size]
-            print(f'Generation {generation}. Best score: {self.population[0][1]}')
+            print(f'Generation {generation}. Best score: {np.around(self.population[0][1], 2)}')
             print(f'All scores: {np.around(np.array([g[1] for g in self.population]), 2).tolist()}')
 
             # Do anything that is required at the end of the generation

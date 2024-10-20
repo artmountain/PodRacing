@@ -14,8 +14,8 @@ from TrainPodRacer import PodRacerGeneticAlgorithm, NUMBER_OF_DRIVE_STEPS, \
     NUMBER_OF_TRAINING_COURSES
 
 # Test flag
-# TEST = False
-TEST = True
+TEST = False
+# TEST = True
 
 POPULATION_SIZE = 5 if TEST else 50
 NUMBER_OF_DRIVE_STEPS = 10 if TEST else 200
@@ -105,7 +105,7 @@ class PodBlockerGeneticAlgorithm(GeneticAlgorithm):
         course = self.courses[0]
         score_racer_alone = np.around(self.evaluate_racer_and_blocker(course, self.racer, None, False)[0], 2)
         score_with_blocker = np.around(self.evaluate_racer_and_blocker(course, self.racer, blocker, False)[0], 2)
-        print(f'Racer score {score_racer_alone}, With blocker {score_with_blocker}, blocker impact: {score_racer_alone - score_with_blocker}')
+        print(f'Racer score {score_racer_alone}, With blocker {score_with_blocker}, blocker impact: {np.around(score_racer_alone - score_with_blocker, 2)}')
 
 
 def train_pod_blocker(racer_file, output_file, blockers_seed_file):
