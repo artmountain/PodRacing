@@ -68,14 +68,6 @@ while True:
             target_angle = pod.angle + steer
             thrust = round(thrust)
             # print(f'Steer: {round(math.degrees(steer))} Thrust: {thrust} Command: {command}', file=sys.stderr, flush=True)
-
-            # On the first step, override the calculated values
-            if not initialized:
-                # TODO : REMOVE THIS? Neural net has it
-                target_angle, _ = get_relative_angle_and_distance(checkpoints[pod.next_checkpoint_id] - pod.position, pod.angle)
-                steer = 0
-                thrust = 100
-                initialized = True
         else:
             # Blocker - inputs are [velocity_angle, speed, velocity_angle, speed, racer_angle, racer_distance, checkpoint_angle, checkpoint_distance]
             opponent = opponent_pods[1 if len(opponent_next_checkpoints[1]) > len(opponent_next_checkpoints[0]) else 0]
