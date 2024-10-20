@@ -8,7 +8,7 @@ from NeuralNet import createNeuralNetwork
 
 class TestNeuralNetTrainToPrimitiveFunctions(unittest.TestCase):
     def test_train_neural_network_with_trig_functions(self):
-        #plot = False
+        # plot = False
         plot = True
 
         data_set_size = 500
@@ -24,7 +24,7 @@ class TestNeuralNetTrainToPrimitiveFunctions(unittest.TestCase):
 
         # Get outputs
         net_outputs = [neural_network.evaluate(i) for i in inputs]
-        #print(net_outputs, outputs[i])
+        # print(net_outputs, outputs[i])
 
         # Output node data
         neural_network.print_neuron_config()

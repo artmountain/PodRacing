@@ -2,7 +2,8 @@ import unittest
 
 import numpy as np
 
-from PodRaceSimulator import Pod, PodRaceSimulator
+from Pod import Pod
+from PodRaceSimulator import PodRaceSimulator
 
 
 class TestPodRaceSimulator(unittest.TestCase):

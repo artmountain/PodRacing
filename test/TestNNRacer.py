@@ -4,8 +4,9 @@ import numpy as np
 from Courses import Course, create_courses
 from DisplayRace import plot_pod_race
 from NeuralNet import NeuralNetwork
+from NeuralNetConfigs import RACER_NN_INPUTS, RACER_NN_OUTPUTS
 from PodRacerFunctions import transform_race_data_to_nn_inputs, transform_nn_outputs_to_instructions
-from TrainPodRacer import RACER_NN_INPUTS, RACER_NN_OUTPUTS, evaluate_racer, train_pod_racer
+from TrainPodRacer import train_pod_racer, PodRacerGeneticAlgorithm
 
 
 class TestNeuralNetRacer(unittest.TestCase):
@@ -25,7 +26,7 @@ class TestNeuralNetRacer(unittest.TestCase):
         course = Course(checkpoints, start_position)
 
         # Run race
-        score, next_checkpoint_idx, path, inputs, nn_data = evaluate_racer(course, racer, True)
+        score, next_checkpoint_idx, path, inputs, nn_data = PodRacerGeneticAlgorithm.evaluate_racer(course, racer, True)
         plot_pod_race(course.get_checkpoints(), path, inputs, nn_data)
         self.assertEqual(True, False)  # add assertion here
 
@@ -73,7 +74,7 @@ class TestNeuralNetRacer(unittest.TestCase):
         print(racer.print_neuron_config())
 
         course = create_courses(1)[0]
-        score, next_checkpoint_idx, path, inputs, nn_data = evaluate_racer(course, racer, True, True)
+        score, next_checkpoint_idx, path, inputs, nn_data = PodRacerGeneticAlgorithm.evaluate_racer(course, racer, True, True)
         plot_pod_race(course.get_checkpoints(), path, inputs, nn_data)
 
     # Test a pre-configured racer
@@ -120,7 +121,7 @@ class TestNeuralNetRacer(unittest.TestCase):
 
         racer = NeuralNetwork(RACER_NN_INPUTS, RACER_NN_OUTPUTS, weights, biases)
         course = create_courses(1)[0]
-        score, next_checkpoint_idx, path, inputs, nn_data = evaluate_racer(course, racer, True, True)
+        score, next_checkpoint_idx, path, inputs, nn_data = PodRacerGeneticAlgorithm.evaluate_racer(course, racer, True, True)
         plot_pod_race(course.get_checkpoints(), path, inputs, nn_data)
 
 
