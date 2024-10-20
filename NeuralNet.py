@@ -9,6 +9,7 @@ import numpy as np
 LEARNING_RATE = 1
 NUMBER_OF_DP_FOR_PICKLE = 6
 
+
 class Neuron:
     def __init__(self, weights, bias):
         self.weights = weights

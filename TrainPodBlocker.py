@@ -7,7 +7,8 @@ from Courses import create_courses
 from GeneticAlgorithm import GeneticAlgorithm
 from NeuralNet import NeuralNetwork
 from NeuralNetConfigs import BLOCKER_NN_CONFIG
-from PodRaceSimulator import PodRaceSimulator, Pod
+from Pod import Pod
+from PodRaceSimulator import PodRaceSimulator
 from PodRacerFunctions import transform_distance_to_input, get_angle, get_distance, get_next_racer_action, \
     get_next_blocker_action
 from TrainPodRacer import PodRacerGeneticAlgorithm, NUMBER_OF_DRIVE_STEPS, \
