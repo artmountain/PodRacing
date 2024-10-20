@@ -6,16 +6,6 @@ import numpy as np
 from PodRacerFunctions import get_distance, get_angle, update_angle
 
 
-class Pod:
-    def __init__(self, position, velocity, angle, next_checkpoint_id):
-        self.position = position
-        self.velocity = velocity
-        self.angle = angle
-        self.next_checkpoint_id = next_checkpoint_id
-
-        self.boost_used = False
-        self.checkpoints_passed = 0
-
 # Angles all in radians
 class PodRaceSimulator:
     def __init__(self, checkpoints, pods):

@@ -20,11 +20,10 @@ if __name__ == '__main__':
                         for functions_line in functions:
                             if not 'import ' in functions_line:
                                 racer.write(functions_line)
-                elif '# INSERT SIMULATOR' in line:
-                    with open('../PodRaceSimulator.py', 'r') as simulator:
-                        for simulator_line in simulator:
-                            if not 'import ' in simulator_line:
-                                racer.write(simulator_line)
+                elif '# INSERT POD' in line:
+                    with open('../Pod.py', 'r') as pod:
+                        for pod_line in pod:
+                            racer.write(pod_line)
                 elif '# INSERT NN CONFIGS' in line:
                     with open('../NeuralNetConfigs.py', 'r') as nn_configs:
                         for nn_configs_line in nn_configs:
@@ -32,8 +31,8 @@ if __name__ == '__main__':
                 elif '# REMOVE THIS lINE' not in line:
                     if '% INSERT RACER NN PARAMETERS %' in line:
                         with open('../nn_data/live_racer_nn_config.txt', 'r') as nn_config:
-                            line = line.replace('% INSERT RACER NN CONFIG %', nn_config.read())
+                            line = line.replace('% INSERT RACER NN PARAMETERS %', nn_config.read())
                     if '% INSERT BLOCKER NN PARAMETERS %' in line:
                         with open('../nn_data/live_blocker_nn_config.txt', 'r') as nn_config:
-                            line = line.replace('% INSERT BLOCKER NN CONFIG %', nn_config.read())
+                            line = line.replace('% INSERT BLOCKER NN PARAMETERS %', nn_config.read())
                     racer.write(line)
