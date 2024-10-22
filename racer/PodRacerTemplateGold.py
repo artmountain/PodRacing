@@ -23,7 +23,6 @@ for i in range(checkpoint_count):
     checkpoints.append(np.array((checkpoint_x, checkpoint_y)))
 # print(f'Checkpoints: {checkpoints}', file=sys.stderr, flush=True)
 
-initialized = False
 my_next_checkpoints = [[0], [0]]
 opponent_next_checkpoints = [[0], [0]]
 pod_boost_used = [False, False]
@@ -39,10 +38,12 @@ while True:
         # angle: angle of the pod
         # next_check_point_id: next check point id of the pod
         x, y, vx, vy, angle, next_checkpoint_id = [int(j) for j in input().split()]
-        pod_angle = math.radians((270 - angle) % 360 - 180)
         position = np.array((x, y))
         velocity = np.array((vx, vy))
         absolute_checkpoint_angle = get_angle(checkpoints[next_checkpoint_id] - position)
+        # Get pod angle allowing for the fact that the first time through the input angle will be given as -1
+        pod_angle = absolute_checkpoint_angle if angle == -1 else math.radians((270 - angle) % 360 - 180)
+        print(f'Input angle: {angle}, pod angle: {pod_angle}', file=sys.stderr, flush=True)
         all_pods.append(Pod(position, velocity, pod_angle, next_checkpoint_id))
         if i > 1:
             if next_checkpoint_id != opponent_next_checkpoints[i - 2][-1]:
