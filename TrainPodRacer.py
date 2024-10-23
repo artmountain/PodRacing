@@ -128,4 +128,6 @@ if __name__ == '__main__':
     # train_pod_racer('nn_data/racer_config5.txt', 'nn_data/racer_config4.txt')
     # train_pod_racer('nn_data/racer_config6.txt', 'nn_data/racer_config5.txt')
     # train_pod_racer('nn_data/racer_config7.txt', 'nn_data/racer_config6.txt')
-    train_pod_racer('nn_data/racer_config8.txt', 'nn_data/racer_config7.txt')
+    # train_pod_racer('nn_data/racer_config8.txt', 'nn_data/racer_config7.txt')
+    # train_pod_racer('nn_data/racer_config9.txt', 'nn_data/racer_config8.txt')
+    train_pod_racer('nn_data/racer_config10.txt', 'nn_data/racer_config9.txt')

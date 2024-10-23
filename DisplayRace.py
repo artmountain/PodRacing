@@ -66,8 +66,7 @@ def plot_pod_race(checkpoints, paths, next_checkpoints, inputs):
             output_text.set_text(output_template % (i, angle, str(thrust), next_checkpoints[i]))
         return *checkpoint_icons, *pod_icons, output_text
 
-    _ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(paths[0]), interval=TIME_PER_FRAME * 1000,
-                                   blit=True)
+    _ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(paths[0]), interval=TIME_PER_FRAME * 1000, blit=True)
     plt.show()
 
 
