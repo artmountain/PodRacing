@@ -5,6 +5,7 @@ import numpy as np
 FULL_CIRCLE = math.radians(360)
 HALF_CIRCLE = math.radians(180)
 MAX_STEER_PER_TURN = math.radians(18)
+MAX_THRUST = 200
 
 
 # All angles in radians
@@ -47,11 +48,11 @@ def transform_distance_to_input(distance):
 
 
 def transform_speed_to_input(_speed):
-    return 1 / (1 + _speed / 100)
+    return 1 / (1 + _speed / MAX_THRUST)
 
 
 def transform_output_to_thrust(output):
-    return output * 100
+    return output * MAX_THRUST
 
 
 # Everything relative to current angle pod is facing. Angles in radians

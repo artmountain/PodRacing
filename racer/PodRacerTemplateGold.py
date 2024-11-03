@@ -84,10 +84,10 @@ while True:
             target_angle = pod.angle + blocker_steer
             thrust = round(blocker_thrust)
 
-        # Output the target position followed by the power (0 <= thrust <= 100)
+        # Output the target position followed by the power (0 <= thrust <= MAX_THRUST)
         target_position = list(map(round, pod.position + 10000 * np.array((math.sin(target_angle), math.cos(target_angle)))))
         if command == 'BOOST':
-            thrust = 100 if pod_boost_used[pod_index] else 'BOOST'
+            thrust = MAX_THRUST if pod_boost_used[pod_index] else 'BOOST'
             pod_boost_used[pod_index] = True
         outputs.append(np.append(deepcopy(target_position), thrust))
 

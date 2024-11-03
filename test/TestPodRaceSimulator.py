@@ -57,5 +57,6 @@ class TestPodRaceSimulator(unittest.TestCase):
         self.assertTrue(np.array_equal(np.array((1000, 938)), pod1.position), 'Check pod 1 position')
         self.assertTrue(np.array_equal(np.array((1000, 2262)), pod2.position), 'Check pod 2 position')
 
+
 if __name__ == '__main__':
     unittest.main()

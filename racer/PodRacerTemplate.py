@@ -64,7 +64,7 @@ while True:
         sim_pos = np.array((x, y))
         print(f'Start angle : {round(math.degrees(pod_angle))}', file=sys.stderr, flush=True)
         print(f'Input checkpoint angle : {input_checkpoint_angle}', file=sys.stderr, flush=True)
-        thrust = 100
+        thrust = MAX_THRUST
         target_angle = pod_angle
         initialized = True
     else:
@@ -106,10 +106,10 @@ while True:
     # Store current position
     last_position = position
 
-    # Output the target position followed by the power (0 <= thrust <= 100)
+    # Output the target position followed by the power (0 <= thrust <= MAX_THRUST)
     target_position = list(map(round, position + 10000 * np.array((math.sin(target_angle), math.cos(target_angle)))))
     if command == 'BOOST':
-        thrust = 100 if boost_used else 'BOOST'
+        thrust = MAX_THRUST if boost_used else 'BOOST'
         boost_used = True
     outputs = np.append(target_position, thrust)
     print(*outputs, 'Beep beep')
