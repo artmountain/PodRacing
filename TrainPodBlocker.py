@@ -137,8 +137,10 @@ def train_pod_blocker(racer_file, output_file, blockers_seed_file):
 
 
 if __name__ == '__main__':
-    train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config.txt', None)
+    # train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config.txt', None)
     # train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config2.txt', 'nn_data/blocker_config.txt')
-    #train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config3.txt', 'nn_data/blocker_config2.txt')
+    # train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config3.txt', 'nn_data/blocker_config2.txt')
     # train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config4.txt', 'nn_data/blocker_config3.txt')
     # train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config5.txt', 'nn_data/blocker_config4.txt')
+    # train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config6.txt', 'nn_data/blocker_config5.txt')
+    train_pod_blocker('nn_data/live_racer_nn_config.txt', 'nn_data/blocker_config7.txt', 'nn_data/blocker_config6.txt')

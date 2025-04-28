@@ -71,14 +71,14 @@ while True:
             # print(f'Steer: {round(math.degrees(steer))} Thrust: {thrust} Command: {command}', file=sys.stderr, flush=True)
         else:
             # Blocker - inputs are [velocity_angle, speed, velocity_angle, speed, racer_angle, racer_distance, checkpoint_angle, checkpoint_distance]
-            opponent = opponent_pods[1 if len(opponent_next_checkpoints[1]) > len(opponent_next_checkpoints[0]) else 0]
+            lead_opponent_id = 1 if len(opponent_next_checkpoints[1]) > len(opponent_next_checkpoints[0]) else 0
+            opponent = opponent_pods[lead_opponent_id]
 
-            if min(my_next_checkpoints) > max(opponent_next_checkpoints):
+            if len(my_next_checkpoints[1]) > len(opponent_next_checkpoints[lead_opponent_id]):
                 # We are winning - use racer config
                 blocker_steer, blocker_thrust, command = get_next_racer_action(pod, checkpoints, racer)
             else:
                 # Act as blocker
-                lead_opponent_id = 1 if len(opponent_next_checkpoints[1]) > len(opponent_next_checkpoints[0]) else 0
                 print(f'Lead opponent pod : {lead_opponent_id} targeting checkpoint {opponent_pods[lead_opponent_id].next_checkpoint_id}', file=sys.stderr, flush=True)
                 blocker_steer, blocker_thrust, command = get_next_blocker_action(pod, opponent_pods[lead_opponent_id], checkpoints, blocker)
             target_angle = pod.angle + blocker_steer
